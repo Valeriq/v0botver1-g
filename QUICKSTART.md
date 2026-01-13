@@ -39,15 +39,14 @@ cp .env.example .env
 
 ```env
 # Вставьте токен из Шага 1
-TELEGRAM_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrsTUVwxyz
+TELEGRAM_BOT_TOKEN=7631533721:AAHgroaH4CGTpjraoJxUlYLAFsR3Q-uSuqM
 
 # Вставьте ваш ID из Шага 2
-ADMIN_TELEGRAM_IDS=123456789
+ADMIN_TELEGRAM_IDS=ваш_telegram_id
 
 # Вставьте ключ из Шага 3
 OPENAI_API_KEY=sk-proj-xxx...
 
-# Остальное оставьте как есть для тестирования
 DATABASE_URL=postgresql://postgres:postgres@postgres:5432/cold_email_bot
 REDIS_URL=redis://redis:6379
 CORE_API_URL=http://core-api:3000
@@ -55,7 +54,7 @@ GMAIL_SERVICE_URL=http://gmail-service:3001
 AI_ORCHESTRATOR_URL=http://ai-orchestrator:3002
 OPENAI_MODEL=gpt-4o-mini
 
-# Google OAuth - оставьте пустым для начала
+# Google OAuth - оставьте пустым для начала (нужно только для отправки email)
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 GOOGLE_REDIRECT_URI=http://localhost:3001/oauth/callback
