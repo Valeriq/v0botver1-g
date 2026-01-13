@@ -10,7 +10,8 @@ export const apiLimiter = rateLimit({
   validate: {
     xForwardedForHeader: false,
     default: true,
-    ip: false
+    ip: false,
+    ipv6SubnetOrKeyGenerator: false
   },
   keyGenerator: (req: Request) => {
     // Use workspace_id if available, otherwise IP
@@ -26,7 +27,8 @@ export const uploadLimiter = rateLimit({
   validate: {
     xForwardedForHeader: false,
     default: true,
-    ip: false
+    ip: false,
+    ipv6SubnetOrKeyGenerator: false
   },
   keyGenerator: (req: Request) => {
     return req.body?.workspace_id || req.ip || "unknown"
@@ -40,7 +42,8 @@ export const campaignLimiter = rateLimit({
   validate: {
     xForwardedForHeader: false,
     default: true,
-    ip: false
+    ip: false,
+    ipv6SubnetOrKeyGenerator: false
   },
   keyGenerator: (req: Request) => {
     return req.body?.workspace_id || req.ip || "unknown"
@@ -54,7 +57,8 @@ export const aiLimiter = rateLimit({
   validate: {
     xForwardedForHeader: false,
     default: true,
-    ip: false
+    ip: false,
+    ipv6SubnetOrKeyGenerator: false
   },
   keyGenerator: (req: Request) => {
     return req.body?.workspace_id || req.ip || "unknown"
