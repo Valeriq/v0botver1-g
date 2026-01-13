@@ -1,4 +1,4 @@
-import rateLimit from "express-rate-limit"
+import rateLimit, { ipKeyGenerator } from "express-rate-limit"
 import type { Request } from "express"
 
 export const apiLimiter = rateLimit({
@@ -7,15 +7,9 @@ export const apiLimiter = rateLimit({
   message: "Too many requests from this IP, please try again later",
   standardHeaders: true,
   legacyHeaders: false,
-  validate: {
-    xForwardedForHeader: false,
-    default: true,
-    ip: false,
-    ipv6SubnetOrKeyGenerator: false
-  },
   keyGenerator: (req: Request) => {
-    // Use workspace_id if available, otherwise IP
-    return req.body?.workspace_id || req.query?.workspace_id || req.ip || "unknown"
+    // Use workspace_id if available, otherwise IP with proper IPv6 handling
+    return req.body?.workspace_id || req.query?.workspace_id || ipKeyGenerator(req.ip) || "unknown"
   },
 })
 
@@ -24,14 +18,8 @@ export const uploadLimiter = rateLimit({
   max: 10, // Max 10 uploads per hour
   message: "Too many file uploads, please try again later",
   skipSuccessfulRequests: false,
-  validate: {
-    xForwardedForHeader: false,
-    default: true,
-    ip: false,
-    ipv6SubnetOrKeyGenerator: false
-  },
   keyGenerator: (req: Request) => {
-    return req.body?.workspace_id || req.ip || "unknown"
+    return req.body?.workspace_id || ipKeyGenerator(req.ip) || "unknown"
   },
 })
 
@@ -39,14 +27,8 @@ export const campaignLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 20, // Max 20 campaigns per hour
   message: "Campaign creation limit reached, please try again later",
-  validate: {
-    xForwardedForHeader: false,
-    default: true,
-    ip: false,
-    ipv6SubnetOrKeyGenerator: false
-  },
   keyGenerator: (req: Request) => {
-    return req.body?.workspace_id || req.ip || "unknown"
+    return req.body?.workspace_id || ipKeyGenerator(req.ip) || "unknown"
   },
 })
 
@@ -54,13 +36,7 @@ export const aiLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 30, // Max 30 AI requests per minute
   message: "AI request limit reached, please slow down",
-  validate: {
-    xForwardedForHeader: false,
-    default: true,
-    ip: false,
-    ipv6SubnetOrKeyGenerator: false
-  },
   keyGenerator: (req: Request) => {
-    return req.body?.workspace_id || req.ip || "unknown"
+    return req.body?.workspace_id || ipKeyGenerator(req.ip) || "unknown"
   },
 })
