@@ -1,0 +1,7 @@
+FROM postgres:16-alpine
+
+# Copy migrations
+COPY services/core-api/migrations /docker-entrypoint-initdb.d/
+
+ENV POSTGRES_DB=cold_email_bot
+ENV POSTGRES_USER=postgres

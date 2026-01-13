@@ -1,0 +1,157 @@
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: postgres
+    plan: free
+    env: docker
+    dockerfilePath: ./Dockerfile.postgres
+    envVars:
+      - key: POSTGRES_DB
+        value: cold_email_bot
+      - key: POSTGRES_USER
+        value: postgres
+      - key: POSTGRES_PASSWORD
+        generateValue: true
+    disk:
+      name: postgres-data
+      mountPath: /var/lib/postgresql/data
+      sizeGB: 1
+
+  # Redis
+  - type: redis
+    name: redis
+    plan: free
+    maxmemoryPolicy: noeviction
+
+  # Core API
+  - type: web
+    name: core-api
+    plan: free
+    env: docker
+    dockerfilePath: ./services/core-api/Dockerfile
+    dockerContext: ./services/core-api
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: redis
+          type: redis
+          property: connectionString
+
+  # Telegram Bot
+  - type: worker
+    name: telegram-bot
+    plan: free
+    env: docker
+    dockerfilePath: ./services/telegram-bot/Dockerfile
+    dockerContext: ./services/telegram-bot
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: CORE_API_URL
+        fromService:
+          name: core-api
+          type: web
+          property: host
+      - key: REDIS_URL
+        fromService:
+          name: redis
+          type: redis
+          property: connectionString
+
+  # Worker
+  - type: worker
+    name: worker
+    plan: free
+    env: docker
+    dockerfilePath: ./services/worker/Dockerfile
+    dockerContext: ./services/worker
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: redis
+          type: redis
+          property: connectionString
+      - key: CORE_API_URL
+        fromService:
+          name: core-api
+          type: web
+          property: host
+      - key: AI_ORCHESTRATOR_URL
+        fromService:
+          name: ai-orchestrator
+          type: web
+          property: host
+
+  # Gmail Service
+  - type: web
+    name: gmail-service
+    plan: free
+    env: docker
+    dockerfilePath: ./services/gmail-service/Dockerfile
+    dockerContext: ./services/gmail-service
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DATABASE_URL
+        fromDatabase:
+          name: postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: redis
+          type: redis
+          property: connectionString
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+      - key: GMAIL_PUBSUB_TOPIC
+        sync: false
+
+  # AI Orchestrator
+  - type: web
+    name: ai-orchestrator
+    plan: free
+    env: docker
+    dockerfilePath: ./services/ai-orchestrator/Dockerfile
+    dockerContext: ./services/ai-orchestrator
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3002
+      - key: DATABASE_URL
+        fromDatabase:
+          name: postgres
+          property: connectionString
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: PERPLEXITY_API_KEY
+        sync: false
