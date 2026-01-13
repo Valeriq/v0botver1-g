@@ -12,6 +12,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDistanceToNow } from "date-fns";
+import { ru } from "date-fns/locale";
+
+const statusLabels: Record<string, string> = {
+  new: "Новый",
+  contacted: "Связались",
+  qualified: "Квалифицирован",
+  converted: "Конвертирован",
+};
+
+const classificationLabels: Record<string, string> = {
+  interested: "Заинтересован",
+  not_interested: "Не заинтересован",
+  meeting_request: "Запрос встречи",
+  question: "Вопрос",
+  out_of_office: "Не в офисе",
+  unsubscribe: "Отписка",
+};
 
 export default function Leads() {
   const { data: leads, isLoading } = useLeads();
@@ -19,25 +36,25 @@ export default function Leads() {
   return (
     <AppLayout>
       <PageHeader
-        title="Leads"
-        description="Track responses and interested prospects."
+        title="Лиды"
+        description="Отслеживайте ответы и заинтересованных клиентов."
       />
 
       <div className="bg-card rounded-xl border border-border/50 shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Status</TableHead>
-              <TableHead>Classification</TableHead>
-              <TableHead>Received</TableHead>
-              <TableHead>Gmail Thread</TableHead>
+              <TableHead>Статус</TableHead>
+              <TableHead>Классификация</TableHead>
+              <TableHead>Получено</TableHead>
+              <TableHead>Gmail Переписка</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
-                  Loading leads...
+                  Загрузка лидов...
                 </TableCell>
               </TableRow>
             ) : leads?.length === 0 ? (
@@ -47,9 +64,9 @@ export default function Leads() {
                     <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
                       <Inbox className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <p className="font-medium">No leads yet</p>
+                    <p className="font-medium">Лидов пока нет</p>
                     <p className="text-sm text-muted-foreground">
-                      Replies classified as leads will appear here.
+                      Ответы, классифицированные как лиды, появятся здесь.
                     </p>
                   </div>
                 </TableCell>
@@ -59,18 +76,20 @@ export default function Leads() {
                 <TableRow key={lead.id}>
                   <TableCell>
                     <Badge variant={lead.status === 'new' ? 'default' : 'secondary'}>
-                      {lead.status}
+                      {statusLabels[lead.status] || lead.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <span className="font-medium capitalize">{lead.classification || 'Unclassified'}</span>
+                    <span className="font-medium">
+                      {classificationLabels[lead.classification] || lead.classification || 'Не классифицирован'}
+                    </span>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {lead.createdAt ? formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true }) : '-'}
+                    {lead.createdAt ? formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true, locale: ru }) : '-'}
                   </TableCell>
                   <TableCell>
                     <a href={`#thread-${lead.gmailThreadId}`} className="flex items-center gap-1 text-primary hover:underline text-sm">
-                      View Thread <ExternalLink className="h-3 w-3" />
+                      Открыть переписку <ExternalLink className="h-3 w-3" />
                     </a>
                   </TableCell>
                 </TableRow>

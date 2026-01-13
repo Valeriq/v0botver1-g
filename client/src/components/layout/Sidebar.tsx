@@ -11,12 +11,12 @@ import {
 import { cn } from "@/lib/utils";
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Contacts", href: "/contacts", icon: Users },
-  { name: "Campaigns", href: "/campaigns", icon: Send },
-  { name: "AI Profiles", href: "/ai-profiles", icon: Sparkles },
-  { name: "Leads", href: "/leads", icon: Inbox },
-  { name: "Gmail Accounts", href: "/gmail-accounts", icon: Mail },
+  { name: "Главная", href: "/", icon: LayoutDashboard },
+  { name: "Контакты", href: "/contacts", icon: Users },
+  { name: "Кампании", href: "/campaigns", icon: Send },
+  { name: "AI Профили", href: "/ai-profiles", icon: Sparkles },
+  { name: "Лиды", href: "/leads", icon: Inbox },
+  { name: "Gmail Аккаунты", href: "/gmail-accounts", icon: Mail },
 ];
 
 export function Sidebar() {
@@ -53,10 +53,10 @@ export function Sidebar() {
 
       <div className="p-4 border-t border-border/50">
         <div className="rounded-xl bg-primary/5 p-4">
-          <h3 className="text-sm font-semibold text-primary mb-1">Need help?</h3>
-          <p className="text-xs text-muted-foreground mb-3">Check our documentation for setup guides.</p>
+          <h3 className="text-sm font-semibold text-primary mb-1">Нужна помощь?</h3>
+          <p className="text-xs text-muted-foreground mb-3">Ознакомьтесь с документацией для настройки.</p>
           <button className="text-xs font-medium text-primary hover:underline">
-            View Docs
+            Документация
           </button>
         </div>
       </div>

@@ -10,23 +10,23 @@ export default function GmailAccounts() {
   return (
     <AppLayout>
       <PageHeader
-        title="Gmail Accounts"
-        description="Connect and manage your sending accounts."
+        title="Gmail Аккаунты"
+        description="Подключайте и управляйте аккаунтами для рассылки."
         actions={
           <Button className="btn-primary">
-            <Mail className="mr-2 h-4 w-4" /> Connect New Account
+            <Mail className="mr-2 h-4 w-4" /> Подключить аккаунт
           </Button>
         }
       />
 
       <div className="grid gap-6 md:grid-cols-2">
         {isLoading ? (
-          <p className="text-muted-foreground">Loading accounts...</p>
+          <p className="text-muted-foreground">Загрузка аккаунтов...</p>
         ) : accounts?.length === 0 ? (
           <div className="col-span-2 text-center py-16 bg-card border border-border/50 rounded-xl border-dashed">
-            <h3 className="text-lg font-semibold">No connected accounts</h3>
+            <h3 className="text-lg font-semibold">Нет подключенных аккаунтов</h3>
             <p className="text-muted-foreground mt-2 mb-6">
-              Connect a Gmail account to start sending campaigns.
+              Подключите Gmail аккаунт, чтобы начать рассылку кампаний.
             </p>
           </div>
         ) : (
@@ -41,20 +41,20 @@ export default function GmailAccounts() {
                   <div className="flex items-center gap-2 mt-1">
                     {account.status === 'ok' ? (
                       <span className="flex items-center text-xs text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full">
-                        <CheckCircle2 className="h-3 w-3 mr-1" /> Active
+                        <CheckCircle2 className="h-3 w-3 mr-1" /> Активен
                       </span>
                     ) : (
                       <span className="flex items-center text-xs text-red-600 font-medium bg-red-50 px-2 py-0.5 rounded-full">
-                        <AlertCircle className="h-3 w-3 mr-1" /> Needs Reauth
+                        <AlertCircle className="h-3 w-3 mr-1" /> Требуется авторизация
                       </span>
                     )}
                     <span className="text-xs text-muted-foreground">
-                      Daily Limit: {account.dailySentCount || 0}/500
+                      Дневной лимит: {account.dailySentCount || 0}/500
                     </span>
                   </div>
                 </div>
               </div>
-              <Button variant="ghost" size="icon" title="Refresh Status">
+              <Button variant="ghost" size="icon" title="Обновить статус">
                 <RefreshCw className="h-4 w-4 text-muted-foreground" />
               </Button>
             </div>

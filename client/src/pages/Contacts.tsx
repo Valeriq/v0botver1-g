@@ -43,14 +43,14 @@ export default function Contacts() {
   return (
     <AppLayout>
       <PageHeader
-        title="Contacts"
-        description="Manage your prospect database and leads."
+        title="Контакты"
+        description="Управляйте базой потенциальных клиентов."
         actions={
           <div className="flex gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
-                placeholder="Search contacts..." 
+                placeholder="Поиск контактов..." 
                 className="pl-9 w-64 bg-background"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -65,24 +65,24 @@ export default function Contacts() {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/30 hover:bg-muted/30">
-              <TableHead>Name</TableHead>
+              <TableHead>Имя</TableHead>
               <TableHead>Email</TableHead>
-              <TableHead>Company</TableHead>
-              <TableHead>Website</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Компания</TableHead>
+              <TableHead>Сайт</TableHead>
+              <TableHead className="text-right">Действия</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
-                  Loading contacts...
+                  Загрузка контактов...
                 </TableCell>
               </TableRow>
             ) : filteredContacts?.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
-                  No contacts found. Add one to get started.
+                  Контакты не найдены. Добавьте первый контакт.
                 </TableCell>
               </TableRow>
             ) : (
@@ -109,7 +109,7 @@ export default function Contacts() {
                     {contact.website && (
                       <a href={contact.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
                         <Globe className="h-3 w-3" />
-                        Visit
+                        Открыть
                       </a>
                     )}
                   </TableCell>
@@ -147,14 +147,10 @@ function CreateContactDialog({ open, onOpenChange }: { open: boolean, onOpenChan
   });
 
   const onSubmit = (data: ContactFormData) => {
-    // Generate a dummy workspaceId since we don't have auth context yet in this demo
     const payload = { 
       ...data, 
-      workspaceId: "00000000-0000-0000-0000-000000000000" // Backend will likely override or fail if strict
+      workspaceId: "00000000-0000-0000-0000-000000000000"
     };
-    
-    // NOTE: In a real app, workspaceId comes from auth context or URL
-    // For this demo, we assume the backend handles it or we pass a dummy one if required by schema
     
     createContact.mutate(payload as any, {
       onSuccess: () => {
@@ -168,21 +164,21 @@ function CreateContactDialog({ open, onOpenChange }: { open: boolean, onOpenChan
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button className="btn-primary">
-          <Plus className="mr-2 h-4 w-4" /> Add Contact
+          <Plus className="mr-2 h-4 w-4" /> Добавить контакт
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Contact</DialogTitle>
+          <DialogTitle>Добавить новый контакт</DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
+              <Label htmlFor="firstName">Имя</Label>
               <Input id="firstName" {...form.register("firstName")} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
+              <Label htmlFor="lastName">Фамилия</Label>
               <Input id="lastName" {...form.register("lastName")} />
             </div>
           </div>
@@ -193,19 +189,19 @@ function CreateContactDialog({ open, onOpenChange }: { open: boolean, onOpenChan
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="company">Company</Label>
+            <Label htmlFor="company">Компания</Label>
             <Input id="company" {...form.register("company")} />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="website">Website</Label>
+            <Label htmlFor="website">Сайт</Label>
             <Input id="website" {...form.register("website")} placeholder="https://" />
           </div>
 
           <div className="pt-4 flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Отмена</Button>
             <Button type="submit" disabled={createContact.isPending}>
-              {createContact.isPending ? "Creating..." : "Create Contact"}
+              {createContact.isPending ? "Создание..." : "Создать контакт"}
             </Button>
           </div>
         </form>

@@ -27,6 +27,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertCampaignSchema } from "@shared/schema";
 
+const statusLabels: Record<string, string> = {
+  active: "Активна",
+  completed: "Завершена",
+  draft: "Черновик",
+  paused: "Приостановлена",
+};
+
 export default function Campaigns() {
   const { data: campaigns, isLoading } = useCampaigns();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -34,8 +41,8 @@ export default function Campaigns() {
   return (
     <AppLayout>
       <PageHeader
-        title="Campaigns"
-        description="Create and manage your outreach sequences."
+        title="Кампании"
+        description="Создавайте и управляйте вашими email-рассылками."
         actions={
           <CreateCampaignDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
         }
@@ -43,17 +50,17 @@ export default function Campaigns() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {isLoading ? (
-          <p className="text-muted-foreground col-span-3 text-center py-10">Loading campaigns...</p>
+          <p className="text-muted-foreground col-span-3 text-center py-10">Загрузка кампаний...</p>
         ) : campaigns?.length === 0 ? (
           <div className="col-span-3 text-center py-16 bg-card border border-border/50 rounded-xl border-dashed">
             <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 text-primary">
               <Play className="h-6 w-6" />
             </div>
-            <h3 className="text-lg font-semibold">No campaigns yet</h3>
+            <h3 className="text-lg font-semibold">Кампаний пока нет</h3>
             <p className="text-muted-foreground max-w-sm mx-auto mt-2 mb-6">
-              Create your first campaign to start reaching out to potential leads.
+              Создайте первую кампанию, чтобы начать рассылку потенциальным клиентам.
             </p>
-            <Button onClick={() => setIsDialogOpen(true)}>Create Campaign</Button>
+            <Button onClick={() => setIsDialogOpen(true)}>Создать кампанию</Button>
           </div>
         ) : (
           campaigns?.map((campaign) => (
@@ -62,8 +69,8 @@ export default function Campaigns() {
                 <Badge variant={
                   campaign.status === 'active' ? 'default' : 
                   campaign.status === 'completed' ? 'secondary' : 'outline'
-                } className="capitalize">
-                  {campaign.status}
+                }>
+                  {statusLabels[campaign.status] || campaign.status}
                 </Badge>
                 <button className="text-muted-foreground hover:text-foreground">
                   <MoreVertical className="h-4 w-4" />
@@ -76,22 +83,22 @@ export default function Campaigns() {
               
               <div className="grid grid-cols-3 gap-2 mt-6 pt-6 border-t border-border/50">
                 <div className="text-center">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Sent</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Отправлено</p>
                   <p className="text-xl font-bold mt-1">{(campaign.stats as any)?.sent || 0}</p>
                 </div>
                 <div className="text-center border-l border-border/50">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Replied</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Ответы</p>
                   <p className="text-xl font-bold mt-1 text-green-600">{(campaign.stats as any)?.replied || 0}</p>
                 </div>
                 <div className="text-center border-l border-border/50">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Failed</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Ошибки</p>
                   <p className="text-xl font-bold mt-1 text-red-500">{(campaign.stats as any)?.failed || 0}</p>
                 </div>
               </div>
 
               <div className="mt-6 flex gap-2">
-                <Button variant="outline" className="w-full">Edit</Button>
-                <Button variant="secondary" className="w-full">Analytics</Button>
+                <Button variant="outline" className="w-full">Редактировать</Button>
+                <Button variant="secondary" className="w-full">Аналитика</Button>
               </div>
             </div>
           ))
@@ -110,7 +117,7 @@ function CreateCampaignDialog({ open, onOpenChange }: { open: boolean, onOpenCha
     defaultValues: {
       name: "",
       promptProfileId: "",
-      workspaceId: "00000000-0000-0000-0000-000000000000", // Dummy
+      workspaceId: "00000000-0000-0000-0000-000000000000",
     }
   });
 
@@ -127,24 +134,24 @@ function CreateCampaignDialog({ open, onOpenChange }: { open: boolean, onOpenCha
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button className="btn-primary">
-          <Plus className="mr-2 h-4 w-4" /> New Campaign
+          <Plus className="mr-2 h-4 w-4" /> Новая кампания
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create New Campaign</DialogTitle>
+          <DialogTitle>Создать новую кампанию</DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Campaign Name</Label>
-            <Input id="name" {...form.register("name")} placeholder="e.g. Q3 Outreach" />
+            <Label htmlFor="name">Название кампании</Label>
+            <Input id="name" {...form.register("name")} placeholder="напр. Рассылка Q3" />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="profile">AI Prompt Profile</Label>
+            <Label htmlFor="profile">AI Профиль</Label>
             <Select onValueChange={(val) => form.setValue("promptProfileId", val)}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a profile" />
+                <SelectValue placeholder="Выберите профиль" />
               </SelectTrigger>
               <SelectContent>
                 {profiles?.map(profile => (
@@ -155,9 +162,9 @@ function CreateCampaignDialog({ open, onOpenChange }: { open: boolean, onOpenCha
           </div>
 
           <div className="pt-4 flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Отмена</Button>
             <Button type="submit" disabled={createCampaign.isPending}>
-              {createCampaign.isPending ? "Creating..." : "Create Campaign"}
+              {createCampaign.isPending ? "Создание..." : "Создать кампанию"}
             </Button>
           </div>
         </form>

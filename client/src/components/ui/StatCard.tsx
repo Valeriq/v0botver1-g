@@ -32,7 +32,7 @@ export function StatCard({ title, value, icon: Icon, trend, className }: StatCar
           )}>
             {trend.isPositive ? "+" : ""}{trend.value}%
           </span>
-          <span className="ml-2 text-muted-foreground">from last month</span>
+          <span className="ml-2 text-muted-foreground">за последний месяц</span>
         </div>
       )}
     </div>
