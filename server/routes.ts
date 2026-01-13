@@ -96,20 +96,20 @@ export async function registerRoutes(
   });
 
   // === Start Core Services ===
-  // Start core-api and telegram-bot in background
-  startService("core-api", "services/core-api/src/index.ts");
+  // Start core-api on port 3000 to avoid conflict with main server (port 5000)
+  startService("core-api", "services/core-api/src/index.ts", { PORT: "3000" });
   startService("telegram-bot", "services/telegram-bot/src/index.ts");
   // startService("worker", "services/worker/src/index.ts"); 
 
   return httpServer;
 }
 
-function startService(name: string, scriptPath: string) {
+function startService(name: string, scriptPath: string, env: Record<string, string> = {}) {
   console.log(`[${name}] Starting service...`);
   // Use tsx to run the service
   const service = spawn("npx", ["tsx", scriptPath], {
     stdio: "inherit",
-    env: { ...process.env },
+    env: { ...process.env, ...env },
     cwd: process.cwd()
   });
 
