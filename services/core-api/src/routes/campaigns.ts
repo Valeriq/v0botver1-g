@@ -2,17 +2,15 @@ import { Router } from "express"
 import { pool } from "../db"
 import { v4 as uuidv4 } from "uuid"
 import { scheduleCampaign } from "../lib/queue"
+import { validateRequest, createCampaignSchema, updateCampaignStatusSchema, paginationSchema } from "../lib/validation"
+import { campaignLimiter } from "../middleware/rateLimiter"
 
 export const campaignRouter = Router()
 
 // Create campaign
-campaignRouter.post("/", async (req, res, next) => {
+campaignRouter.post("/", campaignLimiter, async (req, res, next) => {
   try {
-    const { workspace_id, name, prompt_profile_id, steps } = req.body
-
-    if (!workspace_id || !name) {
-      return res.status(400).json({ error: "workspace_id and name are required" })
-    }
+    const data = validateRequest(createCampaignSchema, req.body)
 
     const client = await pool.connect()
     try {
@@ -23,19 +21,16 @@ campaignRouter.post("/", async (req, res, next) => {
         `INSERT INTO campaigns (id, workspace_id, name, status, prompt_profile_id) 
          VALUES ($1, $2, $3, 'draft', $4) 
          RETURNING *`,
-        [campaignId, workspace_id, name, prompt_profile_id || null],
+        [campaignId, data.workspace_id, data.name, data.prompt_profile_id || null],
       )
 
-      // Create campaign steps
-      if (steps && Array.isArray(steps)) {
-        for (let i = 0; i < steps.length; i++) {
-          const step = steps[i]
-          await client.query(
-            `INSERT INTO campaign_steps (id, campaign_id, step_number, template, delay_hours) 
-             VALUES ($1, $2, $3, $4, $5)`,
-            [uuidv4(), campaignId, i + 1, step.template || "", step.delay_hours || 0],
-          )
-        }
+      for (let i = 0; i < data.steps.length; i++) {
+        const step = data.steps[i]
+        await client.query(
+          `INSERT INTO campaign_steps (id, campaign_id, step_number, template, delay_hours) 
+           VALUES ($1, $2, $3, $4, $5)`,
+          [uuidv4(), campaignId, i + 1, step.template, step.delay_hours],
+        )
       }
 
       await client.query("COMMIT")
@@ -47,6 +42,9 @@ campaignRouter.post("/", async (req, res, next) => {
       client.release()
     }
   } catch (error) {
+    if (error instanceof Error && error.name === "ZodError") {
+      return res.status(400).json({ error: "Validation failed", details: error })
+    }
     next(error)
   }
 })
@@ -60,18 +58,31 @@ campaignRouter.get("/", async (req, res, next) => {
       return res.status(400).json({ error: "workspace_id is required" })
     }
 
+    const { limit, offset } = validateRequest(paginationSchema, req.query)
+
     const result = await pool.query(
       `SELECT c.*, COUNT(DISTINCT cr.id) as recipients_count
        FROM campaigns c
        LEFT JOIN campaign_recipients cr ON c.id = cr.campaign_id
        WHERE c.workspace_id = $1
        GROUP BY c.id
-       ORDER BY c.created_at DESC`,
-      [workspace_id],
+       ORDER BY c.created_at DESC
+       LIMIT $2 OFFSET $3`,
+      [workspace_id, limit, offset],
     )
 
-    res.json({ campaigns: result.rows })
+    const countResult = await pool.query(`SELECT COUNT(*) FROM campaigns WHERE workspace_id = $1`, [workspace_id])
+
+    res.json({
+      campaigns: result.rows,
+      total: Number.parseInt(countResult.rows[0].count),
+      limit,
+      offset,
+    })
   } catch (error) {
+    if (error instanceof Error && error.name === "ZodError") {
+      return res.status(400).json({ error: "Validation failed", details: error })
+    }
     next(error)
   }
 })
@@ -119,26 +130,22 @@ campaignRouter.get("/:id", async (req, res, next) => {
 campaignRouter.post("/:id/status", async (req, res, next) => {
   try {
     const { id } = req.params
-    const { workspace_id, status } = req.body
 
-    if (!["active", "paused"].includes(status)) {
-      return res.status(400).json({ error: "Invalid status. Must be 'active' or 'paused'" })
-    }
+    const data = validateRequest(updateCampaignStatusSchema, req.body)
 
     const result = await pool.query(
       `UPDATE campaigns SET status = $1, updated_at = NOW() 
        WHERE id = $2 AND workspace_id = $3 
        RETURNING *`,
-      [status, id, workspace_id],
+      [data.status, id, data.workspace_id],
     )
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Campaign not found" })
     }
 
-    // If activating campaign, schedule it
-    if (status === "active") {
-      const recipientsScheduled = await scheduleCampaign(id, workspace_id)
+    if (data.status === "active") {
+      const recipientsScheduled = await scheduleCampaign(id, data.workspace_id)
       res.json({
         campaign: result.rows[0],
         recipients_scheduled: recipientsScheduled,
@@ -147,6 +154,9 @@ campaignRouter.post("/:id/status", async (req, res, next) => {
       res.json({ campaign: result.rows[0] })
     }
   } catch (error) {
+    if (error instanceof Error && error.name === "ZodError") {
+      return res.status(400).json({ error: "Validation failed", details: error })
+    }
     next(error)
   }
 })
@@ -161,22 +171,18 @@ campaignRouter.post("/:id/recipients", async (req, res, next) => {
       return res.status(400).json({ error: "contact_ids array is required" })
     }
 
-    // Check suppression list
     const suppressedResult = await pool.query(`SELECT email FROM suppression_list WHERE workspace_id = $1`, [
       workspace_id,
     ])
     const suppressedEmails = new Set(suppressedResult.rows.map((r) => r.email))
 
-    // Get contacts
     const contactsResult = await pool.query(`SELECT id, email FROM contacts WHERE id = ANY($1) AND workspace_id = $2`, [
       contact_ids,
       workspace_id,
     ])
 
-    // Filter out suppressed contacts
     const validContacts = contactsResult.rows.filter((c) => !suppressedEmails.has(c.email))
 
-    // Insert recipients
     const values = validContacts.map((c) => `('${uuidv4()}', '${id}', '${c.id}', 'pending')`).join(",")
 
     if (values) {

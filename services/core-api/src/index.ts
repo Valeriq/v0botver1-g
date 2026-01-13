@@ -13,6 +13,7 @@ import { pool } from "./db"
 import { adminRouter } from "./routes/admin"
 import { requestLogger } from "./middleware/requestLogger"
 import { metricsRouter } from "./routes/metrics"
+import { apiLimiter } from "./middleware/rateLimiter"
 
 dotenv.config()
 
@@ -22,6 +23,8 @@ const PORT = process.env.PORT || 3000
 // Middleware
 app.use(express.json())
 app.use(requestLogger)
+
+app.use("/api/", apiLimiter)
 
 // Routes
 app.use("/health", healthRouter)

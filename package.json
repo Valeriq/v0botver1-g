@@ -35,7 +35,8 @@
     "tailwindcss-animate": "1.0.7",
     "csv-parse": "6.1.0",
     "googleapis": "169.0.0",
-    "openai": "6.15.0"
+    "openai": "6.15.0",
+    "express-rate-limit": "8.2.1"
   },
   "devDependencies": {
     "@types/node": "^22",
