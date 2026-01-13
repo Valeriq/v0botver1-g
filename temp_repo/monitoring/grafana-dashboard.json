@@ -1,0 +1,131 @@
+{
+  "dashboard": {
+    "title": "AI Cold Email Bot - System Overview",
+    "tags": ["cold-email-bot"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Campaign Stats",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "cold_email_bot_campaigns_total",
+            "legendFormat": "Total Campaigns"
+          }
+        ],
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 }
+      },
+      {
+        "id": 2,
+        "title": "Emails Sent",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(cold_email_bot_emails_sent_total[5m])",
+            "legendFormat": "Sent/min"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 }
+      },
+      {
+        "id": 3,
+        "title": "Reply Rate",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "cold_email_bot_replies_total / cold_email_bot_emails_sent_total * 100",
+            "legendFormat": "Reply %"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 6, "x": 12, "y": 4 }
+      },
+      {
+        "id": 4,
+        "title": "Lead Conversion Rate",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "cold_email_bot_leads_total / cold_email_bot_replies_total * 100",
+            "legendFormat": "Lead %"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 6, "x": 18, "y": 4 }
+      },
+      {
+        "id": 5,
+        "title": "Queue Sizes",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "cold_email_bot_queue_size",
+            "legendFormat": "{{queue}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 }
+      },
+      {
+        "id": 6,
+        "title": "Job Processing Time",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(cold_email_bot_job_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{job_type}} p95"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 }
+      },
+      {
+        "id": 7,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(cold_email_bot_errors_total[5m])",
+            "legendFormat": "{{service}} - {{error_type}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 20 }
+      },
+      {
+        "id": 8,
+        "title": "Gmail Account Health",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "cold_email_bot_gmail_account_status",
+            "legendFormat": "{{account_email}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 28 }
+      },
+      {
+        "id": 9,
+        "title": "Active Campaigns",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "cold_email_bot_campaigns_active",
+            "legendFormat": "Active"
+          }
+        ],
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 }
+      },
+      {
+        "id": 10,
+        "title": "System Health",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"cold-email-bot\"}",
+            "legendFormat": "{{service}}"
+          }
+        ],
+        "gridPos": { "h": 4, "w": 12, "x": 12, "y": 0 }
+      }
+    ],
+    "refresh": "30s",
+    "time": { "from": "now-6h", "to": "now" }
+  }
+}
