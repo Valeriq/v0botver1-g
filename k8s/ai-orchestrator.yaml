@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-orchestrator
+  namespace: cold-email-bot
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-orchestrator
+  template:
+    metadata:
+      labels:
+        app: ai-orchestrator
+    spec:
+      containers:
+      - name: ai-orchestrator
+        image: cold-email-bot/ai-orchestrator:latest
+        ports:
+        - containerPort: 3002
+          name: http
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3002
+          initialDelaySeconds: 30
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-orchestrator-service
+  namespace: cold-email-bot
+spec:
+  selector:
+    app: ai-orchestrator
+  ports:
+  - port: 3002
+    targetPort: 3002
+  type: ClusterIP
