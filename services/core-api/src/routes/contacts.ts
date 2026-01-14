@@ -18,6 +18,15 @@ contactRouter.post("/upload", uploadLimiter, async (req, res, next) => {
       trim: true,
     })
 
+    // Сохраняем оригинальный CSV файл в базу
+    const csvUploadId = uuidv4()
+    const filename = data.filename || `upload_${Date.now()}.csv`
+    await pool.query(
+      `INSERT INTO csv_uploads (id, workspace_id, filename, original_content, row_count)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [csvUploadId, data.workspace_id, filename, data.file_content, records.length]
+    )
+
     const emailSet = new Set<string>()
     const contacts = []
     const errors: string[] = []
@@ -65,9 +74,10 @@ contactRouter.post("/upload", uploadLimiter, async (req, res, next) => {
 
     res.json({
       success: true,
+      csvUploadId,
       uploaded: contacts.length,
       skipped: records.length - contacts.length,
-      errors: errors.slice(0, 10), // Return first 10 errors
+      errors: errors.slice(0, 10),
     })
   } catch (error) {
     if (error instanceof Error && error.name === "ZodError") {

@@ -39,6 +39,40 @@ export async function registerRoutes(
     res.status(204).send();
   });
 
+  // CSV Upload
+  app.post(api.contacts.uploadCsv.path, async (req, res) => {
+    try {
+      const input = api.contacts.uploadCsv.input.parse(req.body);
+      const result = await storage.uploadCsv(input.fileContent, input.filename);
+      res.json({
+        success: true,
+        csvUploadId: result.csvUpload.id,
+        uploaded: result.uploaded,
+        skipped: result.skipped,
+        errors: result.errors,
+      });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join('.'),
+        });
+      }
+      if (err instanceof Error) {
+        return res.status(400).json({
+          message: err.message,
+        });
+      }
+      throw err;
+    }
+  });
+
+  // CSV Uploads list
+  app.get(api.csvUploads.list.path, async (req, res) => {
+    const uploads = await storage.getCsvUploads();
+    res.json(uploads);
+  });
+
   // Campaigns
   app.get(api.campaigns.list.path, async (req, res) => {
     const campaigns = await storage.getCampaigns();

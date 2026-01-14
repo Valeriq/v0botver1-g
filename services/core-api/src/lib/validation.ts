@@ -27,6 +27,7 @@ export const updateCampaignStatusSchema = z.object({
 export const uploadContactsSchema = z.object({
   workspace_id: z.string().uuid(),
   file_content: z.string().min(1, "File content is required"),
+  filename: z.string().max(255).optional(),
   delimiter: z.enum([",", "\t", ";"]).default(","),
 })
 

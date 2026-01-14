@@ -85,11 +85,22 @@ export const leads = pgTable("leads", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// === CSV Uploads ===
+export const csvUploads = pgTable("csv_uploads", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
+  filename: varchar("filename", { length: 255 }).notNull(),
+  originalContent: text("original_content").notNull(),
+  rowCount: integer("row_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // === Insert Schemas ===
 export const insertContactSchema = createInsertSchema(contacts).omit({ id: true, createdAt: true });
 export const insertCampaignSchema = createInsertSchema(campaigns).omit({ id: true, createdAt: true, updatedAt: true, stats: true });
 export const insertPromptProfileSchema = createInsertSchema(promptProfiles).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertGmailAccountSchema = createInsertSchema(gmailAccounts).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCsvUploadSchema = createInsertSchema(csvUploads).omit({ id: true, createdAt: true });
 
 // === Types ===
 export type Contact = typeof contacts.$inferSelect;
@@ -105,3 +116,6 @@ export type GmailAccount = typeof gmailAccounts.$inferSelect;
 export type InsertGmailAccount = z.infer<typeof insertGmailAccountSchema>;
 
 export type Lead = typeof leads.$inferSelect;
+
+export type CsvUpload = typeof csvUploads.$inferSelect;
+export type InsertCsvUpload = z.infer<typeof insertCsvUploadSchema>;

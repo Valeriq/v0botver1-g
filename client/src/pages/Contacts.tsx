@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { useContacts, useCreateContact, useDeleteContact } from "@/hooks/use-contacts";
-import { Plus, Trash2, Search, User, Briefcase, Globe } from "lucide-react";
+import { useContacts, useCreateContact, useDeleteContact, useUploadCsv } from "@/hooks/use-contacts";
+import { Plus, Trash2, Search, User, Briefcase, Globe, Upload } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -56,6 +56,7 @@ export default function Contacts() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
+            <UploadCsvButton />
             <CreateContactDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
           </div>
         }
@@ -207,5 +208,99 @@ function CreateContactDialog({ open, onOpenChange }: { open: boolean, onOpenChan
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function UploadCsvButton() {
+  const uploadCsv = useUploadCsv();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [uploadResult, setUploadResult] = useState<{ uploaded: number; skipped: number; errors: string[] } | null>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const fileContent = event.target?.result as string;
+      try {
+        const result = await uploadCsv.mutateAsync({
+          fileContent,
+          filename: file.name,
+        });
+        setUploadResult({
+          uploaded: result.uploaded,
+          skipped: result.skipped,
+          errors: result.errors,
+        });
+        setIsDialogOpen(true);
+      } catch (error) {
+        setUploadResult({
+          uploaded: 0,
+          skipped: 0,
+          errors: [(error as Error).message],
+        });
+        setIsDialogOpen(true);
+      }
+    };
+    reader.readAsText(file);
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  return (
+    <>
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept=".csv"
+        className="hidden"
+        onChange={handleFileChange}
+        data-testid="input-csv-file"
+      />
+      <Button
+        variant="outline"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={uploadCsv.isPending}
+        data-testid="button-upload-csv"
+      >
+        <Upload className="mr-2 h-4 w-4" />
+        {uploadCsv.isPending ? "Загрузка..." : "Загрузить CSV"}
+      </Button>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Результат загрузки CSV</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Загружено контактов:</span>
+              <span className="font-medium text-green-600">{uploadResult?.uploaded || 0}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Пропущено:</span>
+              <span className="font-medium text-yellow-600">{uploadResult?.skipped || 0}</span>
+            </div>
+            {uploadResult?.errors && uploadResult.errors.length > 0 && (
+              <div className="space-y-2">
+                <span className="text-muted-foreground">Ошибки:</span>
+                <ul className="text-sm text-destructive space-y-1">
+                  {uploadResult.errors.map((error, i) => (
+                    <li key={i}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <div className="pt-4 flex justify-end">
+              <Button onClick={() => setIsDialogOpen(false)}>Закрыть</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

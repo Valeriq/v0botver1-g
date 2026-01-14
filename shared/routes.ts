@@ -7,7 +7,8 @@ import {
   campaigns, 
   promptProfiles, 
   gmailAccounts, 
-  leads 
+  leads,
+  csvUploads
 } from './schema';
 
 export const errorSchemas = {
@@ -47,6 +48,33 @@ export const api = {
       responses: {
         204: z.void(),
         404: errorSchemas.notFound,
+      },
+    },
+    uploadCsv: {
+      method: 'POST' as const,
+      path: '/api/contacts/upload-csv',
+      input: z.object({
+        fileContent: z.string(),
+        filename: z.string(),
+      }),
+      responses: {
+        200: z.object({
+          success: z.boolean(),
+          csvUploadId: z.string(),
+          uploaded: z.number(),
+          skipped: z.number(),
+          errors: z.array(z.string()),
+        }),
+        400: errorSchemas.validation,
+      },
+    },
+  },
+  csvUploads: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/csv-uploads',
+      responses: {
+        200: z.array(z.custom<typeof csvUploads.$inferSelect>()),
       },
     },
   },
