@@ -67,18 +67,64 @@ export class DatabaseStorage implements IStorage {
     const errors: string[] = [];
     let records: any[] = [];
     
-    try {
-      records = parse(fileContent, {
-        columns: true,
-        skip_empty_lines: true,
-        trim: true,
-      });
-    } catch (e) {
-      throw new Error("Ошибка парсинга CSV файла. Проверьте формат файла.");
+    // Автоопределение разделителя: запятая, точка с запятой, табуляция
+    const delimiters = [",", ";", "\t"];
+    let parsedSuccessfully = false;
+    
+    for (const delimiter of delimiters) {
+      try {
+        const parsed = parse(fileContent, {
+          columns: true,
+          skip_empty_lines: true,
+          trim: true,
+          delimiter,
+          relaxColumnCount: true,
+          relaxQuotes: true,
+        });
+        
+        // Проверяем что парсинг дал результат с email колонкой
+        if (parsed.length > 0) {
+          const firstRow = parsed[0];
+          const keys = Object.keys(firstRow).map(k => k.toLowerCase());
+          if (keys.some(k => k.includes("email") || k.includes("mail"))) {
+            records = parsed;
+            parsedSuccessfully = true;
+            console.log(`[storage] CSV parsed with delimiter: "${delimiter === "\t" ? "TAB" : delimiter}"`);
+            break;
+          }
+        }
+      } catch (e) {
+        // Пробуем следующий разделитель
+        continue;
+      }
     }
     
-    if (records.length === 0) {
-      throw new Error("CSV файл пустой или не содержит данных.");
+    // Если не удалось найти email колонку, пробуем любой успешный парсинг
+    if (!parsedSuccessfully) {
+      for (const delimiter of delimiters) {
+        try {
+          const parsed = parse(fileContent, {
+            columns: true,
+            skip_empty_lines: true,
+            trim: true,
+            delimiter,
+            relaxColumnCount: true,
+            relaxQuotes: true,
+          });
+          if (parsed.length > 0) {
+            records = parsed;
+            parsedSuccessfully = true;
+            console.log(`[storage] CSV parsed (fallback) with delimiter: "${delimiter === "\t" ? "TAB" : delimiter}"`);
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+    }
+    
+    if (!parsedSuccessfully || records.length === 0) {
+      throw new Error("Не удалось распарсить CSV. Убедитесь что файл содержит заголовки и данные.");
     }
 
     // Загружаем файл в Supabase Storage
@@ -105,9 +151,27 @@ export class DatabaseStorage implements IStorage {
 
     const emailSet = new Set<string>();
     const contactsToInsert: InsertContact[] = [];
+    
+    // Функция для поиска значения по возможным названиям колонок
+    const findValue = (record: any, possibleNames: string[]): string | null => {
+      for (const name of possibleNames) {
+        for (const key of Object.keys(record)) {
+          if (key.toLowerCase() === name.toLowerCase() || 
+              key.toLowerCase().includes(name.toLowerCase())) {
+            const val = record[key];
+            if (val && typeof val === "string" && val.trim()) {
+              return val.trim();
+            }
+          }
+        }
+      }
+      return null;
+    };
 
     for (const record of records) {
-      const email = record.email?.toLowerCase().trim();
+      // Ищем email в разных вариантах названия колонки
+      const rawEmail = findValue(record, ["email", "e-mail", "mail", "почта", "емейл"]);
+      const email = rawEmail?.toLowerCase();
 
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         errors.push(`Неверный email: ${email || "пусто"}`);
@@ -123,10 +187,10 @@ export class DatabaseStorage implements IStorage {
       contactsToInsert.push({
         workspaceId: "00000000-0000-0000-0000-000000000000",
         email,
-        firstName: record.first_name || record.firstName || null,
-        lastName: record.last_name || record.lastName || null,
-        company: record.company || null,
-        website: record.website || null,
+        firstName: findValue(record, ["first_name", "firstname", "имя", "name"]),
+        lastName: findValue(record, ["last_name", "lastname", "фамилия", "surname"]),
+        company: findValue(record, ["company", "компания", "organization", "org"]),
+        website: findValue(record, ["website", "site", "url", "сайт"]),
       });
     }
 
