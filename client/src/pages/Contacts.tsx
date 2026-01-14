@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { useContacts, useCreateContact, useDeleteContact, useUploadCsv } from "@/hooks/use-contacts";
+import { useContacts, useCreateContact, useDeleteContact, useUploadFile } from "@/hooks/use-contacts";
 import { Plus, Trash2, Search, User, Briefcase, Globe, Upload } from "lucide-react";
 import {
   Dialog,
@@ -56,7 +56,7 @@ export default function Contacts() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <UploadCsvButton />
+            <UploadFileButton />
             <CreateContactDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
           </div>
         }
@@ -211,8 +211,8 @@ function CreateContactDialog({ open, onOpenChange }: { open: boolean, onOpenChan
   );
 }
 
-function UploadCsvButton() {
-  const uploadCsv = useUploadCsv();
+function UploadFileButton() {
+  const uploadFile = useUploadFile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [uploadResult, setUploadResult] = useState<{ uploaded: number; skipped: number; errors: string[] } | null>(null);
@@ -223,10 +223,13 @@ function UploadCsvButton() {
 
     const reader = new FileReader();
     reader.onload = async (event) => {
-      const fileContent = event.target?.result as string;
+      const arrayBuffer = event.target?.result as ArrayBuffer;
+      const base64 = btoa(
+        new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
+      );
       try {
-        const result = await uploadCsv.mutateAsync({
-          fileContent,
+        const result = await uploadFile.mutateAsync({
+          fileBase64: base64,
           filename: file.name,
         });
         setUploadResult({
@@ -244,7 +247,7 @@ function UploadCsvButton() {
         setIsDialogOpen(true);
       }
     };
-    reader.readAsText(file);
+    reader.readAsArrayBuffer(file);
     
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -256,25 +259,25 @@ function UploadCsvButton() {
       <input
         type="file"
         ref={fileInputRef}
-        accept=".csv"
+        accept=".xlsx,.xls,.csv"
         className="hidden"
         onChange={handleFileChange}
-        data-testid="input-csv-file"
+        data-testid="input-file-upload"
       />
       <Button
         variant="outline"
         onClick={() => fileInputRef.current?.click()}
-        disabled={uploadCsv.isPending}
-        data-testid="button-upload-csv"
+        disabled={uploadFile.isPending}
+        data-testid="button-upload-file"
       >
         <Upload className="mr-2 h-4 w-4" />
-        {uploadCsv.isPending ? "Загрузка..." : "Загрузить CSV"}
+        {uploadFile.isPending ? "Загрузка..." : "Загрузить Excel/CSV"}
       </Button>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle>Результат загрузки CSV</DialogTitle>
+            <DialogTitle>Результат загрузки</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <div className="flex justify-between">

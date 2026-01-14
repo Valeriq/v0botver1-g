@@ -50,11 +50,11 @@ export const api = {
         404: errorSchemas.notFound,
       },
     },
-    uploadCsv: {
+    uploadFile: {
       method: 'POST' as const,
-      path: '/api/contacts/upload-csv',
+      path: '/api/contacts/upload-file',
       input: z.object({
-        fileContent: z.string(),
+        fileBase64: z.string(),
         filename: z.string(),
       }),
       responses: {

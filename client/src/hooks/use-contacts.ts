@@ -67,16 +67,16 @@ export function useDeleteContact() {
   });
 }
 
-type UploadCsvInput = z.infer<typeof api.contacts.uploadCsv.input>;
-type UploadCsvResponse = z.infer<typeof api.contacts.uploadCsv.responses[200]>;
+type UploadFileInput = z.infer<typeof api.contacts.uploadFile.input>;
+type UploadFileResponse = z.infer<typeof api.contacts.uploadFile.responses[200]>;
 
-export function useUploadCsv() {
+export function useUploadFile() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (data: UploadCsvInput): Promise<UploadCsvResponse> => {
-      const res = await fetch(api.contacts.uploadCsv.path, {
+    mutationFn: async (data: UploadFileInput): Promise<UploadFileResponse> => {
+      const res = await fetch(api.contacts.uploadFile.path, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -85,14 +85,14 @@ export function useUploadCsv() {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.message || "Ошибка загрузки CSV");
+        throw new Error(error.message || "Ошибка загрузки файла");
       }
-      return api.contacts.uploadCsv.responses[200].parse(await res.json());
+      return api.contacts.uploadFile.responses[200].parse(await res.json());
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [api.contacts.list.path] });
       toast({ 
-        title: "CSV загружен", 
+        title: "Файл загружен", 
         description: `Добавлено: ${data.uploaded}, пропущено: ${data.skipped}` 
       });
     },

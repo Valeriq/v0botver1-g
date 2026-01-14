@@ -15,6 +15,7 @@ import {
 } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { parse } from "csv-parse/sync";
+import * as XLSX from "xlsx";
 import { uploadFileToSupabase } from "./supabase";
 
 export interface IStorage {
@@ -23,8 +24,8 @@ export interface IStorage {
   createContact(contact: InsertContact): Promise<typeof contacts.$inferSelect>;
   deleteContact(id: string): Promise<void>;
 
-  // CSV Uploads
-  uploadCsv(fileContent: string, filename: string): Promise<{
+  // File Uploads (CSV/Excel)
+  uploadFile(fileBuffer: Buffer, filename: string): Promise<{
     csvUpload: CsvUpload;
     uploaded: number;
     skipped: number;
@@ -62,45 +63,33 @@ export class DatabaseStorage implements IStorage {
     await db.delete(contacts).where(eq(contacts.id, id));
   }
 
-  // CSV Uploads
-  async uploadCsv(fileContent: string, filename: string) {
+  // File Uploads (CSV/Excel)
+  async uploadFile(fileBuffer: Buffer, filename: string) {
     const errors: string[] = [];
     let records: any[] = [];
+    const lowerFilename = filename.toLowerCase();
+    const isExcel = lowerFilename.endsWith(".xlsx") || lowerFilename.endsWith(".xls");
     
-    // Автоопределение разделителя: запятая, точка с запятой, табуляция
-    const delimiters = [",", ";", "\t"];
-    let parsedSuccessfully = false;
-    
-    for (const delimiter of delimiters) {
+    // Парсинг Excel или CSV
+    if (isExcel) {
       try {
-        const parsed = parse(fileContent, {
-          columns: true,
-          skip_empty_lines: true,
-          trim: true,
-          delimiter,
-          relaxColumnCount: true,
-          relaxQuotes: true,
-        });
-        
-        // Проверяем что парсинг дал результат с email колонкой
-        if (parsed.length > 0) {
-          const firstRow = parsed[0];
-          const keys = Object.keys(firstRow).map(k => k.toLowerCase());
-          if (keys.some(k => k.includes("email") || k.includes("mail"))) {
-            records = parsed;
-            parsedSuccessfully = true;
-            console.log(`[storage] CSV parsed with delimiter: "${delimiter === "\t" ? "TAB" : delimiter}"`);
-            break;
-          }
+        const workbook = XLSX.read(fileBuffer, { type: "buffer" });
+        const firstSheetName = workbook.SheetNames[0];
+        if (!firstSheetName) {
+          throw new Error("Excel файл не содержит листов");
         }
-      } catch (e) {
-        // Пробуем следующий разделитель
-        continue;
+        const worksheet = workbook.Sheets[firstSheetName];
+        records = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+        console.log(`[storage] Excel parsed: ${records.length} rows from sheet "${firstSheetName}"`);
+      } catch (e: any) {
+        throw new Error(`Ошибка парсинга Excel: ${e.message}`);
       }
-    }
-    
-    // Если не удалось найти email колонку, пробуем любой успешный парсинг
-    if (!parsedSuccessfully) {
+    } else {
+      // CSV парсинг с автоопределением разделителя
+      const fileContent = fileBuffer.toString("utf-8");
+      const delimiters = [",", ";", "\t"];
+      let parsedSuccessfully = false;
+      
       for (const delimiter of delimiters) {
         try {
           const parsed = parse(fileContent, {
@@ -114,37 +103,41 @@ export class DatabaseStorage implements IStorage {
           if (parsed.length > 0) {
             records = parsed;
             parsedSuccessfully = true;
-            console.log(`[storage] CSV parsed (fallback) with delimiter: "${delimiter === "\t" ? "TAB" : delimiter}"`);
+            console.log(`[storage] CSV parsed with delimiter: "${delimiter === "\t" ? "TAB" : delimiter}"`);
             break;
           }
         } catch (e) {
           continue;
         }
       }
+      
+      if (!parsedSuccessfully) {
+        throw new Error("Не удалось распарсить CSV файл");
+      }
     }
     
-    if (!parsedSuccessfully || records.length === 0) {
-      throw new Error("Не удалось распарсить CSV. Убедитесь что файл содержит заголовки и данные.");
+    if (records.length === 0) {
+      throw new Error("Файл не содержит данных");
     }
 
     // Загружаем файл в Supabase Storage
     const timestamp = Date.now();
-    const supabasePath = `csv-uploads/${timestamp}_${filename}`;
+    const supabasePath = `uploads/${timestamp}_${filename}`;
     const { url: supabaseUrl, error: uploadError } = await uploadFileToSupabase(
       "csv-files",
       supabasePath,
-      fileContent
+      fileBuffer.toString("base64")
     );
     
     if (uploadError) {
       console.warn(`[storage] Не удалось загрузить в Supabase: ${uploadError}`);
     }
 
-    // Сохраняем оригинальный файл и ссылку на Supabase
+    // Сохраняем запись о загрузке
     const [csvUpload] = await db.insert(csvUploads).values({
       workspaceId: "00000000-0000-0000-0000-000000000000",
       filename,
-      originalContent: fileContent,
+      originalContent: isExcel ? "[Excel binary]" : fileBuffer.toString("utf-8").substring(0, 10000),
       supabaseUrl: supabaseUrl || null,
       rowCount: records.length,
     }).returning();
@@ -159,8 +152,9 @@ export class DatabaseStorage implements IStorage {
           if (key.toLowerCase() === name.toLowerCase() || 
               key.toLowerCase().includes(name.toLowerCase())) {
             const val = record[key];
-            if (val && typeof val === "string" && val.trim()) {
-              return val.trim();
+            if (val !== null && val !== undefined) {
+              const strVal = String(val).trim();
+              if (strVal) return strVal;
             }
           }
         }
@@ -169,8 +163,7 @@ export class DatabaseStorage implements IStorage {
     };
 
     for (const record of records) {
-      // Ищем email в разных вариантах названия колонки
-      const rawEmail = findValue(record, ["email", "e-mail", "mail", "почта", "емейл"]);
+      const rawEmail = findValue(record, ["email", "e-mail", "mail", "почта", "емейл", "электронная почта"]);
       const email = rawEmail?.toLowerCase();
 
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -187,9 +180,9 @@ export class DatabaseStorage implements IStorage {
       contactsToInsert.push({
         workspaceId: "00000000-0000-0000-0000-000000000000",
         email,
-        firstName: findValue(record, ["first_name", "firstname", "имя", "name"]),
+        firstName: findValue(record, ["first_name", "firstname", "имя", "name", "фио"]),
         lastName: findValue(record, ["last_name", "lastname", "фамилия", "surname"]),
-        company: findValue(record, ["company", "компания", "organization", "org"]),
+        company: findValue(record, ["company", "компания", "organization", "org", "организация"]),
         website: findValue(record, ["website", "site", "url", "сайт"]),
       });
     }

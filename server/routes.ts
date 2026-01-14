@@ -39,11 +39,12 @@ export async function registerRoutes(
     res.status(204).send();
   });
 
-  // CSV Upload
-  app.post(api.contacts.uploadCsv.path, async (req, res) => {
+  // File Upload (CSV/Excel)
+  app.post(api.contacts.uploadFile.path, async (req, res) => {
     try {
-      const input = api.contacts.uploadCsv.input.parse(req.body);
-      const result = await storage.uploadCsv(input.fileContent, input.filename);
+      const input = api.contacts.uploadFile.input.parse(req.body);
+      const fileBuffer = Buffer.from(input.fileBase64, "base64");
+      const result = await storage.uploadFile(fileBuffer, input.filename);
       res.json({
         success: true,
         csvUploadId: result.csvUpload.id,
