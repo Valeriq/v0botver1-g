@@ -15,6 +15,7 @@ import {
 } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { parse } from "csv-parse/sync";
+import { uploadFileToSupabase } from "./supabase";
 
 export interface IStorage {
   // Contacts
@@ -80,11 +81,25 @@ export class DatabaseStorage implements IStorage {
       throw new Error("CSV файл пустой или не содержит данных.");
     }
 
-    // Сохраняем оригинальный файл
+    // Загружаем файл в Supabase Storage
+    const timestamp = Date.now();
+    const supabasePath = `csv-uploads/${timestamp}_${filename}`;
+    const { url: supabaseUrl, error: uploadError } = await uploadFileToSupabase(
+      "csv-files",
+      supabasePath,
+      fileContent
+    );
+    
+    if (uploadError) {
+      console.warn(`[storage] Не удалось загрузить в Supabase: ${uploadError}`);
+    }
+
+    // Сохраняем оригинальный файл и ссылку на Supabase
     const [csvUpload] = await db.insert(csvUploads).values({
       workspaceId: "00000000-0000-0000-0000-000000000000",
       filename,
       originalContent: fileContent,
+      supabaseUrl: supabaseUrl || null,
       rowCount: records.length,
     }).returning();
 

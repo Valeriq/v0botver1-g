@@ -91,6 +91,7 @@ export const csvUploads = pgTable("csv_uploads", {
   workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
   filename: varchar("filename", { length: 255 }).notNull(),
   originalContent: text("original_content").notNull(),
+  supabaseUrl: varchar("supabase_url", { length: 500 }),
   rowCount: integer("row_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
