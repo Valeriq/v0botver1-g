@@ -15,3 +15,10 @@ AI Cold Email Bot - система для автоматизированных e
 - `server/` - Express бэкенд
 - `services/` - микросервисы (core-api, telegram-bot, gmail-service, ai-orchestrator, worker)
 - `shared/` - общая схема данных (Drizzle ORM)
+
+### Загрузка контактов
+- Поддерживаются форматы: **Excel (.xlsx, .xls)** и **CSV**
+- CSV: автоопределение разделителя (запятая, точка с запятой, табуляция)
+- Гибкий поиск колонок (email/почта/емейл, first_name/имя, last_name/фамилия, company/компания, website/сайт)
+- Файлы загружаются в Supabase Storage (bucket "csv-files")
+- Body limit: 50MB для больших файлов
