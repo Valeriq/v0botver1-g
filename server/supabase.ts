@@ -15,12 +15,13 @@ export const supabase = createClient(
 export async function uploadFileToSupabase(
   bucketName: string,
   filePath: string,
-  fileContent: string
+  fileBuffer: Buffer,
+  contentType: string = "application/octet-stream"
 ): Promise<{ url: string | null; error: string | null }> {
   const { data, error } = await supabase.storage
     .from(bucketName)
-    .upload(filePath, fileContent, {
-      contentType: "text/csv",
+    .upload(filePath, fileBuffer, {
+      contentType,
       upsert: false,
     });
 

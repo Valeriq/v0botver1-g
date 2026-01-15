@@ -120,13 +120,23 @@ export class DatabaseStorage implements IStorage {
       throw new Error("Файл не содержит данных");
     }
 
+    // Логируем названия колонок для диагностики
+    if (records.length > 0) {
+      const columnNames = Object.keys(records[0]);
+      console.log(`[storage] Найдены колонки: ${columnNames.join(", ")}`);
+    }
+
     // Загружаем файл в Supabase Storage
     const timestamp = Date.now();
     const supabasePath = `uploads/${timestamp}_${filename}`;
+    const contentType = isExcel 
+      ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
+      : "text/csv";
     const { url: supabaseUrl, error: uploadError } = await uploadFileToSupabase(
       "csv-files",
       supabasePath,
-      fileBuffer.toString("base64")
+      fileBuffer,
+      contentType
     );
     
     if (uploadError) {
