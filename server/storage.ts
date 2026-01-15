@@ -173,7 +173,7 @@ export class DatabaseStorage implements IStorage {
     };
 
     for (const record of records) {
-      const rawEmail = findValue(record, ["email", "e-mail", "mail", "почта", "емейл", "электронная почта"]);
+      const rawEmail = findValue(record, ["email", "e-mail", "mail", "почта", "емейл", "электронная почта", "электронный адрес"]);
       const email = rawEmail?.toLowerCase();
 
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -190,10 +190,10 @@ export class DatabaseStorage implements IStorage {
       contactsToInsert.push({
         workspaceId: "00000000-0000-0000-0000-000000000000",
         email,
-        firstName: findValue(record, ["first_name", "firstname", "имя", "name", "фио"]),
+        firstName: findValue(record, ["first_name", "firstname", "имя", "name", "фио", "контакт лпр"]),
         lastName: findValue(record, ["last_name", "lastname", "фамилия", "surname"]),
-        company: findValue(record, ["company", "компания", "organization", "org", "организация"]),
-        website: findValue(record, ["website", "site", "url", "сайт"]),
+        company: findValue(record, ["company", "компания", "organization", "org", "организация", "наименование"]),
+        website: findValue(record, ["website", "site", "url", "сайт", "сайт в сети интернет"]),
       });
     }
 
