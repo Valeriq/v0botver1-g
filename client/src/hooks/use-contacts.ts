@@ -101,3 +101,49 @@ export function useUploadFile() {
     },
   });
 }
+
+export type UploadToStorageResponse = {
+  success: boolean;
+  id: string;
+  filename: string;
+  supabase_url: string;
+  file_size: number;
+  created_at: string;
+  uploaded: number;
+  skipped: number;
+  errors: string[];
+};
+
+export function useUploadFileToStorage() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (file: File): Promise<UploadToStorageResponse> => {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload-file-storage", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Ошибка загрузки файла");
+      }
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: [api.contacts.list.path] });
+      toast({ 
+        title: "Файл загружен", 
+        description: `Добавлено: ${data.uploaded}, пропущено: ${data.skipped}` 
+      });
+    },
+    onError: (error) => {
+      toast({ title: "Ошибка", description: error.message, variant: "destructive" });
+    },
+  });
+}

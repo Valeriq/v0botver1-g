@@ -5,6 +5,7 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { spawn } from "child_process";
 import path from "path";
+import multer from "multer";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -72,6 +73,48 @@ export async function registerRoutes(
   app.get(api.csvUploads.list.path, async (req, res) => {
     const uploads = await storage.getCsvUploads();
     res.json(uploads);
+  });
+
+  // File Upload to Supabase Storage (FormData) - парсит контакты и сохраняет в БД
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 50 * 1024 * 1024 },
+  });
+
+  app.post("/api/upload-file-storage", upload.single("file"), async (req, res) => {
+    try {
+      const file = req.file;
+
+      if (!file) {
+        return res.status(400).json({ error: "Файл не предоставлен" });
+      }
+
+      const allowedExts = [".csv", ".xlsx", ".xls"];
+      const ext = file.originalname.substring(file.originalname.lastIndexOf('.')).toLowerCase();
+      if (!allowedExts.includes(ext)) {
+        return res.status(400).json({ error: "Неподдерживаемый формат файла. Используйте CSV или Excel." });
+      }
+
+      const result = await storage.uploadFile(file.buffer, file.originalname);
+
+      res.status(201).json({
+        success: true,
+        id: result.csvUpload.id,
+        filename: result.csvUpload.filename,
+        supabase_url: result.csvUpload.supabaseUrl,
+        file_size: file.size,
+        created_at: result.csvUpload.createdAt,
+        uploaded: result.uploaded,
+        skipped: result.skipped,
+        errors: result.errors,
+      });
+    } catch (error) {
+      console.error("[upload-file-storage] Error:", error);
+      if (error instanceof Error) {
+        return res.status(400).json({ error: error.message });
+      }
+      res.status(500).json({ error: "Внутренняя ошибка сервера" });
+    }
   });
 
   // Campaigns

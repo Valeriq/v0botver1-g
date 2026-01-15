@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { useContacts, useCreateContact, useDeleteContact, useUploadFile } from "@/hooks/use-contacts";
+import { useContacts, useCreateContact, useDeleteContact, useUploadFileToStorage } from "@/hooks/use-contacts";
 import { Plus, Trash2, Search, User, Briefcase, Globe, Upload } from "lucide-react";
 import {
   Dialog,
@@ -212,42 +212,52 @@ function CreateContactDialog({ open, onOpenChange }: { open: boolean, onOpenChan
 }
 
 function UploadFileButton() {
-  const uploadFile = useUploadFile();
+  const uploadFile = useUploadFileToStorage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [uploadResult, setUploadResult] = useState<{ uploaded: number; skipped: number; errors: string[] } | null>(null);
+  const [uploadResult, setUploadResult] = useState<{ 
+    success: boolean; 
+    filename: string; 
+    uploaded?: number;
+    skipped?: number;
+    errors?: string[];
+    error?: string;
+  } | null>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const arrayBuffer = event.target?.result as ArrayBuffer;
-      const base64 = btoa(
-        new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
-      );
-      try {
-        const result = await uploadFile.mutateAsync({
-          fileBase64: base64,
-          filename: file.name,
-        });
-        setUploadResult({
-          uploaded: result.uploaded,
-          skipped: result.skipped,
-          errors: result.errors,
-        });
-        setIsDialogOpen(true);
-      } catch (error) {
-        setUploadResult({
-          uploaded: 0,
-          skipped: 0,
-          errors: [(error as Error).message],
-        });
-        setIsDialogOpen(true);
-      }
-    };
-    reader.readAsArrayBuffer(file);
+    const allowedExts = [".csv", ".xlsx", ".xls"];
+    const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+    if (!allowedExts.includes(ext)) {
+      setUploadResult({
+        success: false,
+        filename: file.name,
+        error: "Выберите CSV или Excel файл (.csv, .xlsx, .xls)"
+      });
+      setIsDialogOpen(true);
+      return;
+    }
+
+    try {
+      const result = await uploadFile.mutateAsync(file);
+      setUploadResult({
+        success: true,
+        filename: result.filename,
+        uploaded: result.uploaded,
+        skipped: result.skipped,
+        errors: result.errors,
+      });
+      setIsDialogOpen(true);
+    } catch (error) {
+      setUploadResult({
+        success: false,
+        filename: file.name,
+        error: (error as Error).message,
+      });
+      setIsDialogOpen(true);
+    }
     
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -280,23 +290,45 @@ function UploadFileButton() {
             <DialogTitle>Результат загрузки</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Загружено контактов:</span>
-              <span className="font-medium text-green-600">{uploadResult?.uploaded || 0}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Пропущено:</span>
-              <span className="font-medium text-yellow-600">{uploadResult?.skipped || 0}</span>
-            </div>
-            {uploadResult?.errors && uploadResult.errors.length > 0 && (
-              <div className="space-y-2">
-                <span className="text-muted-foreground">Ошибки:</span>
-                <ul className="text-sm text-destructive space-y-1">
-                  {uploadResult.errors.map((error, i) => (
-                    <li key={i}>{error}</li>
-                  ))}
-                </ul>
-              </div>
+            {uploadResult?.success ? (
+              <>
+                <div className="flex items-center gap-2 text-green-600">
+                  <span className="font-medium">Файл успешно загружен!</span>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  <span className="font-medium">{uploadResult.filename}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Загружено контактов:</span>
+                  <span className="font-medium text-green-600">{uploadResult.uploaded || 0}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Пропущено:</span>
+                  <span className="font-medium text-yellow-600">{uploadResult.skipped || 0}</span>
+                </div>
+                {uploadResult.errors && uploadResult.errors.length > 0 && (
+                  <div className="space-y-2">
+                    <span className="text-muted-foreground">Предупреждения:</span>
+                    <ul className="text-sm text-yellow-600 space-y-1 max-h-32 overflow-y-auto">
+                      {uploadResult.errors.slice(0, 5).map((err, i) => (
+                        <li key={i}>{err}</li>
+                      ))}
+                      {uploadResult.errors.length > 5 && (
+                        <li>...и ещё {uploadResult.errors.length - 5}</li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 text-destructive">
+                  <span className="font-medium">Ошибка загрузки</span>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {uploadResult?.error || "Неизвестная ошибка"}
+                </div>
+              </>
             )}
             <div className="pt-4 flex justify-end">
               <Button onClick={() => setIsDialogOpen(false)}>Закрыть</Button>

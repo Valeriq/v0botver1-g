@@ -1,4 +1,5 @@
 import express from "express"
+import cors from "cors"
 import dotenv from "dotenv"
 import { healthRouter } from "./routes/health"
 import { workspaceRouter } from "./routes/workspaces"
@@ -14,6 +15,7 @@ import { adminRouter } from "./routes/admin"
 import { requestLogger } from "./middleware/requestLogger"
 import { metricsRouter } from "./routes/metrics"
 import { apiLimiter } from "./middleware/rateLimiter"
+import { fileUploadRouter } from "./routes/file-upload"
 
 dotenv.config()
 
@@ -21,6 +23,10 @@ const app = express()
 const PORT = process.env.PORT || 3000
 
 // Middleware
+app.use(cors({
+  origin: ["http://localhost:5000", "http://0.0.0.0:5000"],
+  credentials: true
+}))
 app.use(express.json())
 app.use(requestLogger)
 
@@ -37,6 +43,7 @@ app.use("/api/leads", leadRouter)
 app.use("/api/billing", billingRouter)
 app.use("/api/admin", adminRouter)
 app.use("/api/metrics", metricsRouter)
+app.use("/api", fileUploadRouter)
 
 // Error handling
 app.use(errorHandler)
