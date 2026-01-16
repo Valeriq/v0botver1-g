@@ -6,11 +6,120 @@ import { z } from "zod";
 import { spawn } from "child_process";
 import path from "path";
 import multer from "multer";
+import crypto from "crypto";
+
+const telegramAuthSchema = z.object({
+  id: z.number(),
+  first_name: z.string().optional(),
+  last_name: z.string().optional(),
+  username: z.string().optional(),
+  photo_url: z.string().optional(),
+  auth_date: z.number(),
+  hash: z.string(),
+});
+
+function validateTelegramAuth(data: z.infer<typeof telegramAuthSchema>): boolean {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) {
+    console.error("[telegram-auth] TELEGRAM_BOT_TOKEN not set");
+    return false;
+  }
+
+  const { hash, ...authData } = data;
+  const dataCheckString = Object.keys(authData)
+    .sort()
+    .map(key => `${key}=${authData[key as keyof typeof authData]}`)
+    .join('\n');
+
+  const secretKey = crypto.createHash('sha256').update(botToken).digest();
+  const hmac = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
+
+  if (hmac !== hash) {
+    return false;
+  }
+
+  const authDate = data.auth_date;
+  const now = Math.floor(Date.now() / 1000);
+  if (now - authDate > 86400) {
+    return false;
+  }
+
+  return true;
+}
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // === Auth Routes ===
+
+  app.post("/api/auth/telegram", async (req, res) => {
+    try {
+      const authData = telegramAuthSchema.parse(req.body);
+
+      if (!validateTelegramAuth(authData)) {
+        return res.status(401).json({ error: "Недействительные данные авторизации" });
+      }
+
+      const user = await storage.upsertUser({
+        telegramUserId: authData.id,
+        username: authData.username || null,
+        firstName: authData.first_name || null,
+        lastName: authData.last_name || null,
+        photoUrl: authData.photo_url || null,
+        authDate: new Date(authData.auth_date * 1000),
+      });
+
+      req.session = req.session || {};
+      (req.session as any).userId = user.id;
+      (req.session as any).telegramUserId = user.telegramUserId;
+
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          telegramUserId: user.telegramUserId,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          photoUrl: user.photoUrl,
+        },
+      });
+    } catch (err) {
+      console.error("[telegram-auth] Error:", err);
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ error: "Некорректные данные" });
+      }
+      res.status(500).json({ error: "Ошибка авторизации" });
+    }
+  });
+
+  app.get("/api/auth/me", async (req, res) => {
+    const userId = (req.session as any)?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Не авторизован" });
+    }
+
+    const user = await storage.getUserById(userId);
+    if (!user) {
+      return res.status(401).json({ error: "Пользователь не найден" });
+    }
+
+    res.json({
+      id: user.id,
+      telegramUserId: user.telegramUserId,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      photoUrl: user.photoUrl,
+    });
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.session = null as any;
+    res.json({ success: true });
+  });
+
   // === API Routes ===
 
   // Contacts

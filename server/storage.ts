@@ -6,12 +6,14 @@ import {
   gmailAccounts,
   leads,
   csvUploads,
+  users,
   type InsertContact,
   type InsertCampaign,
   type InsertPromptProfile,
   type InsertGmailAccount,
   type InsertCsvUpload,
-  type CsvUpload
+  type CsvUpload,
+  type User
 } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { parse } from "csv-parse/sync";
@@ -19,6 +21,18 @@ import * as XLSX from "xlsx";
 import { uploadFileToSupabase } from "./supabase";
 
 export interface IStorage {
+  // Users (Auth)
+  getUserById(id: string): Promise<User | null>;
+  getUserByTelegramId(telegramUserId: number): Promise<User | null>;
+  upsertUser(data: {
+    telegramUserId: number;
+    username: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    photoUrl: string | null;
+    authDate: Date;
+  }): Promise<User>;
+
   // Contacts
   getContacts(): Promise<typeof contacts.$inferSelect[]>;
   createContact(contact: InsertContact): Promise<typeof contacts.$inferSelect>;
@@ -49,6 +63,53 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  // Users (Auth)
+  async getUserById(id: string): Promise<User | null> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || null;
+  }
+
+  async getUserByTelegramId(telegramUserId: number): Promise<User | null> {
+    const [user] = await db.select().from(users).where(eq(users.telegramUserId, telegramUserId));
+    return user || null;
+  }
+
+  async upsertUser(data: {
+    telegramUserId: number;
+    username: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    photoUrl: string | null;
+    authDate: Date;
+  }): Promise<User> {
+    const existingUser = await this.getUserByTelegramId(data.telegramUserId);
+    
+    if (existingUser) {
+      const [updatedUser] = await db.update(users)
+        .set({
+          username: data.username,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          photoUrl: data.photoUrl,
+          authDate: data.authDate,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.telegramUserId, data.telegramUserId))
+        .returning();
+      return updatedUser;
+    }
+
+    const [newUser] = await db.insert(users).values({
+      telegramUserId: data.telegramUserId,
+      username: data.username,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      photoUrl: data.photoUrl,
+      authDate: data.authDate,
+    }).returning();
+    return newUser;
+  }
+
   // Contacts
   async getContacts() {
     return await db.select().from(contacts);

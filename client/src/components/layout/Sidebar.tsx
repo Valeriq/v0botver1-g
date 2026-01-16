@@ -6,9 +6,13 @@ import {
   Sparkles, 
   Inbox, 
   Mail,
-  Bot
+  Bot,
+  LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 const navigation = [
   { name: "Главная", href: "/", icon: LayoutDashboard },
@@ -21,6 +25,12 @@ const navigation = [
 
 export function Sidebar() {
   const [location] = useLocation();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = "/login";
+  };
 
   return (
     <div className="flex h-screen flex-col border-r bg-card w-64 fixed left-0 top-0 z-50">
@@ -52,13 +62,33 @@ export function Sidebar() {
       </div>
 
       <div className="p-4 border-t border-border/50">
-        <div className="rounded-xl bg-primary/5 p-4">
-          <h3 className="text-sm font-semibold text-primary mb-1">Нужна помощь?</h3>
-          <p className="text-xs text-muted-foreground mb-3">Ознакомьтесь с документацией для настройки.</p>
-          <button className="text-xs font-medium text-primary hover:underline">
-            Документация
-          </button>
-        </div>
+        {user && (
+          <div className="flex items-center gap-3 p-2 rounded-lg hover-elevate">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={user.photoUrl || undefined} alt={user.firstName || "User"} />
+              <AvatarFallback className="bg-primary/10 text-primary">
+                {user.firstName?.[0] || user.username?.[0] || "U"}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">
+                {user.firstName || user.username || "Пользователь"}
+              </p>
+              {user.username && (
+                <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="text-muted-foreground hover:text-destructive"
+              data-testid="button-logout"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
