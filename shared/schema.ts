@@ -15,10 +15,16 @@ export const workspaces = pgTable("workspaces", {
 // === Users ===
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
-  workspaceId: uuid("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
+  workspaceId: uuid("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }),
   telegramUserId: bigint("telegram_user_id", { mode: "number" }).notNull().unique(),
+  username: varchar("username", { length: 255 }),
+  firstName: varchar("first_name", { length: 255 }),
+  lastName: varchar("last_name", { length: 255 }),
+  photoUrl: varchar("photo_url", { length: 500 }),
+  authDate: timestamp("auth_date"),
   role: varchar("role", { length: 50 }).default("member"),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // === Contacts ===
@@ -97,6 +103,7 @@ export const csvUploads = pgTable("csv_uploads", {
 });
 
 // === Insert Schemas ===
+export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertContactSchema = createInsertSchema(contacts).omit({ id: true, createdAt: true });
 export const insertCampaignSchema = createInsertSchema(campaigns).omit({ id: true, createdAt: true, updatedAt: true, stats: true });
 export const insertPromptProfileSchema = createInsertSchema(promptProfiles).omit({ id: true, createdAt: true, updatedAt: true });
@@ -104,6 +111,9 @@ export const insertGmailAccountSchema = createInsertSchema(gmailAccounts).omit({
 export const insertCsvUploadSchema = createInsertSchema(csvUploads).omit({ id: true, createdAt: true });
 
 // === Types ===
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+
 export type Contact = typeof contacts.$inferSelect;
 export type InsertContact = z.infer<typeof insertContactSchema>;
 
