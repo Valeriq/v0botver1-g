@@ -1,18 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { TelegramLoginButton, type TelegramUser } from "@/components/TelegramLoginButton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Loader2, Send, UserCheck } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 
 const TELEGRAM_BOT_NAME = "makegoodmarketingbot";
-const IS_DEV = import.meta.env.DEV;
 
 export default function Login() {
   const { login, isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
-  const [isDevLoading, setIsDevLoading] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
@@ -26,23 +23,6 @@ export default function Login() {
       setLocation("/");
     } catch (error) {
       console.error("Authentication failed:", error);
-    }
-  };
-
-  const handleDevLogin = async () => {
-    setIsDevLoading(true);
-    try {
-      const response = await fetch("/api/auth/dev-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (response.ok) {
-        window.location.href = "/";
-      }
-    } catch (error) {
-      console.error("Dev login failed:", error);
-    } finally {
-      setIsDevLoading(false);
     }
   };
 
@@ -76,28 +56,6 @@ export default function Login() {
           <p className="text-sm text-muted-foreground text-center max-w-xs">
             Нажмите кнопку выше для быстрой авторизации через ваш Telegram аккаунт
           </p>
-          
-          {IS_DEV && (
-            <div className="w-full pt-4 border-t">
-              <p className="text-xs text-muted-foreground text-center mb-3">
-                Режим разработки
-              </p>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleDevLogin}
-                disabled={isDevLoading}
-                data-testid="button-dev-login"
-              >
-                {isDevLoading ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <UserCheck className="h-4 w-4 mr-2" />
-                )}
-                Тестовый вход
-              </Button>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
