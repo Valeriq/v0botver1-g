@@ -120,6 +120,25 @@ export async function registerRoutes(
     res.json({ success: true });
   });
 
+  app.post("/api/auth/dev-login", async (req, res) => {
+    if (process.env.NODE_ENV === "production") {
+      return res.status(403).json({ error: "Dev login disabled in production" });
+    }
+    
+    const devUser = await storage.upsertUser({
+      id: "dev-user-12345",
+      telegramId: 12345,
+      username: "dev_tester",
+      firstName: "Тестовый",
+      lastName: "Пользователь",
+      photoUrl: null,
+      authDate: new Date(),
+    });
+    
+    req.session = { userId: devUser.id };
+    res.json({ user: devUser });
+  });
+
   // === API Routes ===
 
   // Contacts
