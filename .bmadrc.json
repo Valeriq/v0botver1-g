@@ -1,0 +1,34 @@
+{
+  "ide": "cline",
+  "framework": "bmad-method",
+  "version": "4.44.3",
+  "expansions": [
+    "bmad-infrastructure-devops"
+  ],
+  "auto_context": true,
+  "project_type": "microservices",
+  "technologies": [
+    "TypeScript",
+    "Node.js",
+    "PostgreSQL",
+    "Redis",
+    "Docker",
+    "Kubernetes",
+    "Telegram Bot API",
+    "OpenAI API"
+  ],
+  "project_features": [
+    "Telegram bot",
+    "AI orchestrator",
+    "Gmail integration",
+    "Campaign management",
+    "Contact management",
+    "Authentication via Telegram"
+  ],
+  "optimization_goals": [
+    "performance",
+    "scalability",
+    "security",
+    "maintainability"
+  ]
+}

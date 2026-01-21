@@ -1,5 +1,8 @@
 # AI Cold Email Bot MVP
 
+![CI Status](https://github.com/Valeriq/v0botver1-g/workflows/CI/badge.svg)
+![Coverage](https://codecov.io/gh/Valeriq/v0botver1-g/branch/main/graph/badge.svg)
+
 Telegram-based SaaS for AI-powered cold email campaigns with multi-step follow-ups, Gmail integration, and live reply management.
 
 ## Architecture
@@ -53,9 +56,41 @@ This project consists of multiple microservices:
 
 ### Service Endpoints
 
-- Core API: http://localhost:3000/health
-- Gmail Service: http://localhost:3001/health
-- AI Orchestrator: http://localhost:3002/health
+#### Health Check Endpoints
+
+All services provide comprehensive health check endpoints:
+
+**Core API (port 3000)**
+- `GET /health` - Basic health check
+- `GET /health/live` - Liveness probe (Kubernetes)
+- `GET /health/ready` - Readiness probe (Kubernetes)
+- `GET /health/detailed` - Detailed health with response times
+
+**Gmail Service (port 3001)**
+- `GET /health` - Basic health check
+- `GET /health/live` - Liveness probe
+- `GET /health/ready` - Readiness probe
+- `GET /health/detailed` - Detailed health with response times
+
+**AI Orchestrator (port 3002)**
+- `GET /health` - Basic health check
+- `GET /health/live` - Liveness probe
+- `GET /health/ready` - Readiness probe
+- `GET /health/detailed` - Detailed health with response times
+
+**Telegram Bot (port 8080)**
+- `GET /health` - Basic health check
+- `GET /health/live` - Liveness probe
+- `GET /health/ready` - Readiness probe
+- `GET /health/detailed` - Detailed health with response times
+
+**Worker (port 8081)**
+- `GET /health` - Basic health check
+- `GET /health/live` - Liveness probe
+- `GET /health/ready` - Readiness probe
+- `GET /health/detailed` - Detailed health with response times
+
+#### Database Services
 - PostgreSQL: localhost:5432
 - Redis: localhost:6379
 
@@ -287,12 +322,22 @@ npm run dev
 ### Run Tests
 
 ```bash
-# Unit tests (TODO)
-npm test
+# Run all tests
+pnpm test
 
-# Integration tests (TODO)
-npm run test:integration
+# Run tests with coverage
+pnpm test:coverage
+
+# Run tests in watch mode
+pnpm test:watch
+
+# Run tests for specific service
+cd services/core-api && npm test
 ```
+
+#### Coverage
+
+Code coverage is tracked by [Codecov](https://codecov.io/gh/Valeriq/v0botver1-g). Coverage reports are automatically generated and uploaded on each push to main or develop branches.
 
 ### View Logs
 

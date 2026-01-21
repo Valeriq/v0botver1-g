@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface TelegramLoginButtonProps {
   botName: string;
@@ -35,11 +35,14 @@ export function TelegramLoginButton({
 }: TelegramLoginButtonProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     window.onTelegramAuth = onAuth;
 
     const script = document.createElement("script");
-    script.src = "https://telegram.org/js/telegram-widget.js?22";
+    script.src = "https://telegram.org/js/telegram-widget.js";
     script.async = true;
     script.setAttribute("data-telegram-login", botName);
     script.setAttribute("data-size", buttonSize);
@@ -49,6 +52,17 @@ export function TelegramLoginButton({
     if (showUserPhoto) {
       script.setAttribute("data-userpic", "true");
     }
+
+    script.onload = () => {
+      setIsLoading(false);
+      setError(null);
+    };
+
+    script.onerror = () => {
+      setIsLoading(false);
+      setError("Не удалось загрузить Telegram виджет. Попробуйте позже или используйте демо режим.");
+      console.error("Telegram Widget failed to load");
+    };
 
     if (containerRef.current) {
       containerRef.current.innerHTML = "";
@@ -63,10 +77,24 @@ export function TelegramLoginButton({
   }, [botName, onAuth, buttonSize, cornerRadius, requestAccess, showUserPhoto]);
 
   return (
-    <div 
-      ref={containerRef} 
-      className="telegram-login-container flex items-center justify-center"
-      data-testid="telegram-login-button"
-    />
+    <div className="flex flex-col items-center justify-center gap-2">
+      <div 
+        ref={containerRef} 
+        className="telegram-login-container flex items-center justify-center"
+        data-testid="telegram-login-button"
+      />
+      
+      {isLoading && (
+        <div className="text-sm text-muted-foreground animate-pulse">
+          Загрузка Telegram виджета...
+        </div>
+      )}
+      
+      {error && (
+        <div className="text-sm text-destructive bg-destructive/10 px-4 py-2 rounded-md max-w-md text-center">
+          {error}
+        </div>
+      )}
+    </div>
   );
 }

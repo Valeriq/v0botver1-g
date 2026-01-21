@@ -1,11 +1,58 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
-import { serveStatic } from "./static";
+import { registerRoutes } from "./routes.js";
+import { serveStatic } from "./static.js";
 import { createServer } from "http";
 import cookieSession from "cookie-session";
 
 const app = express();
 const httpServer = createServer(app);
+
+// Graceful shutdown - корректное завершение работы
+let isShuttingDown = false;
+
+const gracefulShutdown = (signal: string) => {
+  if (isShuttingDown) {
+    log(`Получен сигнал ${signal}, но уже завершаем работу...`, 'shutdown');
+    return;
+  }
+
+  isShuttingDown = true;
+  log(`Получен сигнал ${signal}, начинаем graceful shutdown...`, 'shutdown');
+
+  // Закрываем HTTP сервер
+  httpServer.close(() => {
+    log('HTTP сервер закрыт', 'shutdown');
+    process.exit(0);
+  });
+
+  // Принудительное завершение через 10 секунд
+  setTimeout(() => {
+    log('Принудительное завершение процесса', 'shutdown');
+    process.exit(1);
+  }, 10000);
+};
+
+// Обработка сигналов завершения
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Обработка необработанных исключений
+process.on('uncaughtException', (error: Error) => {
+  log(`❌ Необработанное исключение: ${error.message}`, 'error');
+  log(error.stack || '', 'error');
+  
+  if (!isShuttingDown) {
+    gracefulShutdown('uncaughtException');
+  }
+});
+
+// Обработка необработанных rejected Promise
+process.on('unhandledRejection', (reason: any) => {
+  log(`❌ Необработанный rejection: ${reason}`, 'error');
+  if (reason instanceof Error && reason.stack) {
+    log(reason.stack, 'error');
+  }
+});
 
 declare module "http" {
   interface IncomingMessage {
@@ -87,7 +134,7 @@ app.use((req, res, next) => {
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);
   } else {
-    const { setupVite } = await import("./vite");
+    const { setupVite } = await import("./vite.js");
     await setupVite(httpServer, app);
   }
 
@@ -95,15 +142,18 @@ app.use((req, res, next) => {
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || "5000", 10);
+  const port = parseInt(process.env.PORT || "3000", 10);
   httpServer.listen(
     {
       port,
-      host: "0.0.0.0",
-      reusePort: true,
+      host: process.env.NODE_ENV === "production" ? "0.0.0.0" : "127.0.0.1",
     },
     () => {
-      log(`serving on port ${port}`);
+      log(`serving on http://localhost:${port}`);
+      if (process.env.NODE_ENV !== "production") {
+        log(`Demo mode: API доступен по http://localhost:${port}/api/*`);
+        log(`Demo mode: Веб-интерфейс доступен по http://localhost:${port}`);
+      }
     },
   );
 })();

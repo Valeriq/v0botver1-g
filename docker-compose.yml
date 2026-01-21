@@ -47,16 +47,25 @@ services:
       - ./services/core-api:/app
       - /app/node_modules
     command: npm run dev
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   telegram-bot:
     build:
       context: ./services/telegram-bot
       dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
     environment:
       NODE_ENV: development
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       CORE_API_URL: http://core-api:3000
       REDIS_URL: redis://redis:6379
+      HEALTH_PORT: 8080
     depends_on:
       - core-api
       - redis
@@ -64,26 +73,45 @@ services:
       - ./services/telegram-bot:/app
       - /app/node_modules
     command: npm run dev
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   worker:
     build:
       context: ./services/worker
       dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/cold_email_bot
       REDIS_URL: redis://redis:6379
       CORE_API_URL: http://core-api:3000
       AI_ORCHESTRATOR_URL: http://ai-orchestrator:3002
+      HEALTH_PORT: 8081
     depends_on:
-      - postgres
-      - redis
-      - core-api
-      - ai-orchestrator
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      core-api:
+        condition: service_started
+      ai-orchestrator:
+        condition: service_started
     volumes:
       - ./services/worker:/app
       - /app/node_modules
     command: npm run dev
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   gmail-service:
     build:
@@ -108,6 +136,12 @@ services:
       - ./services/gmail-service:/app
       - /app/node_modules
     command: npm run dev
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   ai-orchestrator:
     build:
@@ -128,6 +162,12 @@ services:
       - ./services/ai-orchestrator:/app
       - /app/node_modules
     command: npm run dev
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   postgres_data:

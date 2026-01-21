@@ -22,7 +22,8 @@ export async function setupVite(server: Server, app: Express) {
       ...viteLogger,
       error: (msg, options) => {
         viteLogger.error(msg, options);
-        process.exit(1);
+        // НЕ убиваем процесс при ошибках Vite - позволяем серверу продолжать работу
+        // process.exit(1);  // Убрано - это было причиной падения сервера
       },
     },
     server: serverOptions,

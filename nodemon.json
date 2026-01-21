@@ -1,0 +1,22 @@
+{
+  "watch": ["server", "client"],
+  "ext": "ts,tsx,js,jsx,json",
+  "ignore": [
+    "node_modules",
+    "dist",
+    ".git",
+    "coverage",
+    "*.test.ts",
+    "*.test.tsx",
+    "temp_repo"
+  ],
+  "exec": "node --import tsx/esm server/index.ts",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "delay": "1000",
+  "legacyWatch": true,
+  "verbose": true,
+  "restartable": "rs",
+  "colours": true
+}

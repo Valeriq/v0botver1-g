@@ -7,10 +7,10 @@ if (!supabaseUrl || !supabaseServiceKey) {
   console.warn("[supabase] SUPABASE_URL или SUPABASE_SERVICE_KEY не заданы");
 }
 
-export const supabase = createClient(
-  supabaseUrl || "",
-  supabaseServiceKey || ""
-);
+// Создаем клиента только если есть credentials
+export const supabase = supabaseUrl && supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null as any;
 
 export async function uploadFileToSupabase(
   bucketName: string,
@@ -18,6 +18,11 @@ export async function uploadFileToSupabase(
   fileBuffer: Buffer,
   contentType: string = "application/octet-stream"
 ): Promise<{ url: string | null; error: string | null }> {
+  if (!supabase) {
+    console.warn("[supabase] Supabase не настроен, пропускаем загрузку файла");
+    return { url: null, error: "Supabase не настроен" };
+  }
+
   const { data, error } = await supabase.storage
     .from(bucketName)
     .upload(filePath, fileBuffer, {

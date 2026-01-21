@@ -2,7 +2,8 @@ import { useState, useRef } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useContacts, useCreateContact, useDeleteContact, useUploadFileToStorage } from "@/hooks/use-contacts";
-import { Plus, Trash2, Search, User, Briefcase, Globe, Upload, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Trash2, Search, User, Briefcase, Globe, Upload, ChevronLeft, ChevronRight, CheckSquare, Square } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,8 @@ export default function Contacts() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedContactIds, setSelectedContactIds] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const filteredContacts = contacts?.filter(contact => 
     contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -57,6 +60,62 @@ export default function Contacts() {
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     setCurrentPage(1);
+  };
+
+  const handleSelectContact = (contactId: string) => {
+    setSelectedContactIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(contactId)) {
+        newSet.delete(contactId);
+      } else {
+        newSet.add(contactId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (paginatedContacts && paginatedContacts.length > 0) {
+      const allSelected = paginatedContacts.every(c => selectedContactIds.has(c.id));
+      if (allSelected) {
+        setSelectedContactIds(prev => {
+          const newSet = new Set(prev);
+          paginatedContacts.forEach(c => newSet.delete(c.id));
+          return newSet;
+        });
+      } else {
+        setSelectedContactIds(prev => {
+          const newSet = new Set(prev);
+          paginatedContacts.forEach(c => newSet.add(c.id));
+          return newSet;
+        });
+      }
+    }
+  };
+
+  const isAllSelectedOnPage = paginatedContacts && paginatedContacts.length > 0 && 
+    paginatedContacts.every(c => selectedContactIds.has(c.id));
+
+  const isSomeSelectedOnPage = paginatedContacts && paginatedContacts.some(c => selectedContactIds.has(c.id));
+
+  const handleDeleteSelected = async () => {
+    if (selectedContactIds.size === 0) return;
+    
+    if (!confirm(`Вы уверены, что хотите удалить ${selectedContactIds.size} контакт(ов)?`)) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await Promise.all(
+        Array.from(selectedContactIds).map(id => deleteContact.mutateAsync(id))
+      );
+      setSelectedContactIds(new Set());
+    } catch (error) {
+      console.error('Error deleting contacts:', error);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -81,10 +140,41 @@ export default function Contacts() {
         }
       />
 
+      {selectedContactIds.size > 0 && (
+        <div className="mb-4 p-4 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium">Выбрано контактов: <span className="text-primary">{selectedContactIds.size}</span></span>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDeleteSelected}
+              disabled={isDeleting}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              {isDeleting ? "Удаление..." : `Удалить выбранные (${selectedContactIds.size})`}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedContactIds(new Set())}
+            >
+              Очистить выбор
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="bg-card rounded-xl border border-border/50 shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/30 hover:bg-muted/30">
+              <TableHead className="w-12">
+                <Checkbox
+                  checked={isAllSelectedOnPage}
+                  onCheckedChange={handleSelectAll}
+                  aria-label="Выбрать все контакты на странице"
+                />
+              </TableHead>
               <TableHead>Имя</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Компания</TableHead>
@@ -95,19 +185,26 @@ export default function Contacts() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                   Загрузка контактов...
                 </TableCell>
               </TableRow>
             ) : paginatedContacts?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                   Контакты не найдены. Добавьте первый контакт.
                 </TableCell>
               </TableRow>
             ) : (
               paginatedContacts?.map((contact) => (
-                <TableRow key={contact.id} className="group">
+                <TableRow key={contact.id} className={`group ${selectedContactIds.has(contact.id) ? 'bg-primary/5' : ''}`}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedContactIds.has(contact.id)}
+                      onCheckedChange={() => handleSelectContact(contact.id)}
+                      aria-label={`Выбрать контакт ${contact.firstName} ${contact.lastName}`}
+                    />
+                  </TableCell>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
                       <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">

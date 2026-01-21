@@ -6,6 +6,7 @@ import { processSendJob } from "./processors/send"
 import { processFollowupJob } from "./processors/followup"
 import { processClassifyJob } from "./processors/classify"
 import { processNotifyJob } from "./processors/notify"
+import { startHealthServer } from "./health-server"
 
 dotenv.config()
 
@@ -119,6 +120,14 @@ async function start() {
 
     await pool.query("SELECT NOW()")
     console.log("[worker] Connected to PostgreSQL")
+
+    // Start health check server (if not in test mode)
+    if (process.env.NODE_ENV !== "test") {
+      const healthPort = parseInt(process.env.HEALTH_PORT || "8081")
+      startHealthServer(healthPort, pool).catch((error) => {
+        console.error("[worker] Failed to start health server:", error)
+      })
+    }
 
     pollQueue(QUEUES.generate, processGenerateJob)
     pollQueue(QUEUES.send, processSendJob)

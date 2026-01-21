@@ -9,6 +9,7 @@ import { leadsScene } from "./scenes/leads"
 import { balanceScene } from "./scenes/balance"
 import { adminScene } from "./scenes/admin"
 import { metricsScene } from "./scenes/metrics"
+import { startHealthServer } from "./health-server"
 
 dotenv.config()
 
@@ -83,6 +84,14 @@ process.once("SIGTERM", () => {
 })
 
 // Launch
+// Start health check server (if not in test mode)
+if (process.env.NODE_ENV !== "test") {
+  const healthPort = parseInt(process.env.HEALTH_PORT || "8080")
+  startHealthServer(healthPort).catch((error) => {
+    console.error("[telegram-bot] Failed to start health server:", error)
+  })
+}
+
 bot
   .launch()
   .then(() => {

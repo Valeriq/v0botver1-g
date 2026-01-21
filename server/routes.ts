@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import type { Server } from "http";
-import { storage } from "./storage";
+import { jsonStorage as storage } from "./storage-json";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import { spawn } from "child_process";
@@ -20,9 +20,11 @@ const telegramAuthSchema = z.object({
 
 function validateTelegramAuth(data: z.infer<typeof telegramAuthSchema>): boolean {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  if (!botToken) {
-    console.error("[telegram-auth] TELEGRAM_BOT_TOKEN not set");
-    return false;
+
+  // In demo mode, accept dummy tokens
+  if (botToken === 'dummy' || !botToken) {
+    console.log("[telegram-auth] Demo mode: accepting any auth data");
+    return true;
   }
 
   const { hash, ...authData } = data;
@@ -118,6 +120,42 @@ export async function registerRoutes(
   app.post("/api/auth/logout", (req, res) => {
     req.session = null as any;
     res.json({ success: true });
+  });
+
+  // Demo auth endpoint - allows login without Telegram
+  app.post("/api/auth/demo", async (req, res) => {
+    try {
+      console.log("[demo-auth] Demo authentication requested");
+
+      // Create demo user
+      const user = await storage.upsertUser({
+        telegramUserId: 123456789,
+        username: "demo_user",
+        firstName: "Demo",
+        lastName: "User",
+        photoUrl: null,
+        authDate: new Date(),
+      });
+
+      req.session = req.session || {};
+      (req.session as any).userId = user.id;
+      (req.session as any).telegramUserId = user.telegramUserId;
+
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          telegramUserId: user.telegramUserId,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          photoUrl: user.photoUrl,
+        },
+      });
+    } catch (err) {
+      console.error("[demo-auth] Error:", err);
+      res.status(500).json({ error: "Ошибка демо авторизации" });
+    }
   });
 
   // === API Routes ===
@@ -283,10 +321,14 @@ export async function registerRoutes(
   });
 
   // === Start Core Services ===
-  // Start core-api on port 3000 to avoid conflict with main server (port 5000)
-  startService("core-api", "services/core-api/src/index.ts", { PORT: "3000" });
-  startService("telegram-bot", "services/telegram-bot/src/index.ts");
-  // startService("worker", "services/worker/src/index.ts"); 
+  // В демо режиме не запускаем микросервисы
+  if (process.env.DATABASE_URL && process.env.REDIS_URL) {
+    startService("core-api", "services/core-api/src/index.ts", { PORT: "3000" });
+    startService("telegram-bot", "services/telegram-bot/src/index.ts");
+    // startService("worker", "services/worker/src/index.ts");
+  } else {
+    console.log("[services] Демо режим: микросервисы отключены");
+  }
 
   return httpServer;
 }

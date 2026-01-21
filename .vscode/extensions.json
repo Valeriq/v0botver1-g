@@ -1,0 +1,6 @@
+{
+    "recommendations": [
+        "factory.factory-vscode-extension",
+        "ms-vscode.live-server"
+    ]
+}

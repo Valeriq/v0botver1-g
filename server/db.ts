@@ -4,11 +4,11 @@ import * as schema from "@shared/schema";
 
 const { Pool } = pg;
 
+// Для демо режима используем mock, если база не доступна
 if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+  console.warn("⚠️  DATABASE_URL не установлена. Работаем в демо режиме без базы данных.");
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle(pool, { schema });
+// Создаем pool только если есть DATABASE_URL
+export const pool = process.env.DATABASE_URL ? new Pool({ connectionString: process.env.DATABASE_URL }) : null;
+export const db = pool ? drizzle(pool, { schema }) : null;
