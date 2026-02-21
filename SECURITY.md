@@ -2,7 +2,7 @@
 
 ## ⚠️ ВАЖНО: Защита конфиденциальных данных
 
-Вы получили Telegram Bot Token: `7631533721:AAHgroaH4CGTpjraoJxUlYLAFsR3Q-uSuqM`
+Вы получите Telegram Bot Token от @BotFather при создании бота
 
 ### Критические правила безопасности:
 
@@ -25,7 +25,7 @@ cp .env.example .env
 Откройте файл `.env` и замените первую строку:
 
 ```env
-TELEGRAM_BOT_TOKEN=7631533721:AAHgroaH4CGTpjraoJxUlYLAFsR3Q-uSuqM
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 
 # Остальные настройки...
 ```
@@ -81,8 +81,8 @@ kind: Secret
 metadata:
   name: bot-secrets
 type: Opaque
-stringData:
-  telegram-bot-token: "7631533721:AAHgroaH4CGTpjraoJxUlYLAFsR3Q-uSuqM"
+  stringData:
+    telegram-bot-token: "your_telegram_bot_token"
 ```
 
 Затем примонтируйте secret:

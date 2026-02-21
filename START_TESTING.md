@@ -3,7 +3,7 @@
 ## Что вам понадобится
 
 ✅ **У вас уже есть:**
-- Telegram Bot Token: `7631533721:AAHgroaH4CGTpjraoJxUlYLAFsR3Q-uSuqM`
+- Telegram Bot Token (получите от @BotFather)
 - Проект на GitHub
 
 ⚠️ **Нужно установить (если еще нет):**
@@ -32,7 +32,7 @@ cd v0-ai-cold-email-bot
 
 ```env
 # Telegram Bot
-TELEGRAM_BOT_TOKEN=7631533721:AAHgroaH4CGTpjraoJxUlYLAFsR3Q-uSuqM
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 
 # PostgreSQL
 POSTGRES_HOST=postgres

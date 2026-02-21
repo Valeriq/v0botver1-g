@@ -39,7 +39,7 @@ cp .env.example .env
 
 ```env
 # Вставьте токен из Шага 1
-TELEGRAM_BOT_TOKEN=7631533721:AAHgroaH4CGTpjraoJxUlYLAFsR3Q-uSuqM
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 
 # Вставьте ваш ID из Шага 2
 ADMIN_TELEGRAM_IDS=ваш_telegram_id
