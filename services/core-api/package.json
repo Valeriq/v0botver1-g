@@ -12,7 +12,6 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@cold-email-bot/shared": "workspace:*",
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",
     "pg": "^8.11.3",
