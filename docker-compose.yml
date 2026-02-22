@@ -31,6 +31,7 @@ services:
     build:
       context: ./services/core-api
       dockerfile: Dockerfile
+      target: development
     ports:
       - "3000:3000"
     environment:
@@ -46,7 +47,7 @@ services:
     volumes:
       - ./services/core-api:/app
       - /app/node_modules
-    command: npm run dev
+    command: pnpm run dev
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
       interval: 30s
