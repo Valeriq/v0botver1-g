@@ -8,6 +8,7 @@
     "dev:safe": "node scripts/dev-server.js",
     "dev:legacy": "node --import tsx/esm server/index.ts",
     "build": "pnpm -r build",
+    "build:client": "cd client && pnpm run build",
     "migrate": "docker-compose exec core-api pnpm migrate",
     "lint": "eslint services/**/*.ts packages/**/*.ts --fix",
     "lint:check": "eslint services/**/*.ts packages/**/*.ts",
