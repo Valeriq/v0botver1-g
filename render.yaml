@@ -155,3 +155,15 @@ services:
         value: gpt-4o-mini
       - key: PERPLEXITY_API_KEY
         sync: false
+
+  # Frontend Client
+  - type: web
+    name: client
+    plan: free
+    env: docker
+    dockerfilePath: ./client/Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
