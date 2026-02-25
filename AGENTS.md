@@ -40,6 +40,18 @@ This file defines the specialized AI personas, roles, and rules for this project
 ### Documentation Rule
 - Always add JSDoc comments to new or undocumented functions. Ensure parameters and return types are clearly described.
 
+## Documentation Sync
+
+### Before Starting
+- Verify README.md is still accurate for current implementation
+- If outdated, flag it before proceeding with changes
+
+### After Git Commit
+- Automatically update README.md to reflect code changes
+- Update relevant sections: features, architecture, API, setup
+- Run in parallel with commit confirmation - don't wait for user prompt
+- If changes are minor (typos, comments), skip to avoid noise
+
 ## Template Instructions
 
 To add a new agent, use the following structure:
