@@ -9,6 +9,7 @@
     "dev:legacy": "node --import tsx/esm server/index.ts",
     "build": "pnpm -r build",
     "build:client": "cd client && pnpm run build",
+    "typecheck": "pnpm -r exec tsc --noEmit",
     "migrate": "docker-compose exec core-api pnpm migrate",
     "lint": "eslint services/**/*.ts packages/**/*.ts --fix",
     "lint:check": "eslint services/**/*.ts packages/**/*.ts",
@@ -19,7 +20,8 @@
     "test:unit": "vitest run **/*.test.ts",
     "test:integration": "vitest run **/__tests__/**/*.test.ts",
     "test:legacy": "pnpm -r test",
-    "migrate:test": "DATABASE_URL=$DATABASE_URL node services/core-api/src/db/migrate.ts"
+    "migrate:test": "DATABASE_URL=$DATABASE_URL node services/core-api/src/db/migrate.ts",
+    "check": "pnpm lint:check && pnpm typecheck && pnpm test"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
