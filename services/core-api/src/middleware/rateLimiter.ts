@@ -1,4 +1,4 @@
-import rateLimit, { ipKeyGenerator } from "express-rate-limit"
+import rateLimit from "express-rate-limit"
 import type { Request } from "express"
 
 export const apiLimiter = rateLimit({
@@ -8,8 +8,8 @@ export const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req: Request) => {
-    // Use workspace_id if available, otherwise IP with proper IPv6 handling
-    return req.body?.workspace_id || req.query?.workspace_id || ipKeyGenerator(req.ip) || "unknown"
+    // Use workspace_id if available, otherwise IP
+    return req.body?.workspace_id || req.query?.workspace_id || req.ip || "unknown"
   },
 })
 
@@ -19,7 +19,7 @@ export const uploadLimiter = rateLimit({
   message: "Too many file uploads, please try again later",
   skipSuccessfulRequests: false,
   keyGenerator: (req: Request) => {
-    return req.body?.workspace_id || ipKeyGenerator(req.ip) || "unknown"
+    return req.body?.workspace_id || req.ip || "unknown"
   },
 })
 
@@ -28,7 +28,7 @@ export const campaignLimiter = rateLimit({
   max: 20, // Max 20 campaigns per hour
   message: "Campaign creation limit reached, please try again later",
   keyGenerator: (req: Request) => {
-    return req.body?.workspace_id || ipKeyGenerator(req.ip) || "unknown"
+    return req.body?.workspace_id || req.ip || "unknown"
   },
 })
 
@@ -37,6 +37,6 @@ export const aiLimiter = rateLimit({
   max: 30, // Max 30 AI requests per minute
   message: "AI request limit reached, please slow down",
   keyGenerator: (req: Request) => {
-    return req.body?.workspace_id || ipKeyGenerator(req.ip) || "unknown"
+    return req.body?.workspace_id || req.ip || "unknown"
   },
 })

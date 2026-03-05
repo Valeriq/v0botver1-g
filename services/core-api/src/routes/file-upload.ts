@@ -88,6 +88,11 @@ router.post(
       const sanitizedName = sanitizeFilename(file.originalname)
       const storagePath = `uploads/${workspaceId}/${timestamp}_${sanitizedName}`
 
+      if (!supabase) {
+        res.status(500).json({ error: "Supabase не настроен. Установите SUPABASE_URL и SUPABASE_SERVICE_KEY." })
+        return
+      }
+
       const { error: storageError } = await supabase.storage
         .from("csv-files")
         .upload(storagePath, file.buffer, {

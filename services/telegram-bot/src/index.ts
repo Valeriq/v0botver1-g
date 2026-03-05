@@ -17,13 +17,13 @@ const bot = new Telegraf<Scenes.SceneContext>(process.env.TELEGRAM_BOT_TOKEN!)
 
 // Create stage with all scenes
 const stage = new Scenes.Stage<Scenes.SceneContext>([
-  contactsScene,
-  aiScene,
-  campaignsScene,
-  leadsScene,
-  balanceScene,
-  adminScene,
-  metricsScene,
+  contactsScene as any,
+  aiScene as any,
+  campaignsScene as any,
+  leadsScene as any,
+  balanceScene as any,
+  adminScene as any,
+  metricsScene as any,
 ])
 
 // Middleware

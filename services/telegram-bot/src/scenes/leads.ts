@@ -1,19 +1,9 @@
-import { Scenes, Markup, type Context } from "telegraf"
+import { Scenes, Markup } from "telegraf"
 import axios from "axios"
 
 const coreApiUrl = process.env.CORE_API_URL || "http://localhost:3000"
 
-interface LeadsSceneSession extends Scenes.SceneSession {
-  awaitingReply?: boolean
-  currentLeadId?: string
-}
-
-interface LeadsContext extends Context {
-  scene: Scenes.SceneContextScene<LeadsContext, LeadsSceneSession>
-  session: LeadsSceneSession
-}
-
-export const leadsScene = new Scenes.BaseScene<LeadsContext>("leads")
+export const leadsScene = new Scenes.BaseScene<Scenes.SceneContext>("leads")
 
 leadsScene.enter(async (ctx) => {
   const workspaceId = ctx.from?.id.toString()
@@ -98,8 +88,8 @@ leadsScene.action(/^take_lead_(.+)$/, async (ctx) => {
     )
 
     // Set up awaiting reply state
-    ctx.scene.session.awaitingReply = true
-    ctx.scene.session.currentLeadId = leadId
+    ;(ctx.scene.session as any).awaitingReply = true
+    ;(ctx.scene.session as any).currentLeadId = leadId
   } catch (error: any) {
     console.error("[leads] Take lead error:", error.response?.data || error.message)
     await ctx.reply("❌ Ошибка: лид уже взят или не найден")
@@ -158,22 +148,22 @@ leadsScene.action(/^reply_lead_(.+)$/, async (ctx) => {
       "Используйте /cancel для отмены",
   )
 
-  ctx.scene.session.awaitingReply = true
-  ctx.scene.session.currentLeadId = leadId
+  ;(ctx.scene.session as any).awaitingReply = true
+  ;(ctx.scene.session as any).currentLeadId = leadId
 })
 
 // Handle live reply text
 leadsScene.on("text", async (ctx) => {
-  if (ctx.scene.session.awaitingReply && ctx.scene.session.currentLeadId) {
+  if ((ctx.scene.session as any).awaitingReply && (ctx.scene.session as any).currentLeadId) {
     const replyText = ctx.message.text
-    const leadId = ctx.scene.session.currentLeadId
+    const leadId = (ctx.scene.session as any).currentLeadId
     const workspaceId = ctx.from?.id.toString()
     const userId = ctx.from?.id.toString()
 
     if (replyText === "/cancel") {
       await ctx.reply("❌ Отменено")
-      ctx.scene.session.awaitingReply = false
-      ctx.scene.session.currentLeadId = undefined
+      ;(ctx.scene.session as any).awaitingReply = false
+      ;(ctx.scene.session as any).currentLeadId = undefined
       return
     }
 
@@ -188,14 +178,14 @@ leadsScene.on("text", async (ctx) => {
 
       await ctx.reply("✅ Ответ отправлен успешно!\n\nИспользуйте /menu для возврата в главное меню")
 
-      ctx.scene.session.awaitingReply = false
-      ctx.scene.session.currentLeadId = undefined
+      ;(ctx.scene.session as any).awaitingReply = false
+      ;(ctx.scene.session as any).currentLeadId = undefined
       await ctx.scene.leave()
     } catch (error: any) {
       console.error("[leads] Reply error:", error.response?.data || error.message)
       await ctx.reply("❌ Ошибка отправки ответа. Попробуйте позже.")
-      ctx.scene.session.awaitingReply = false
-      ctx.scene.session.currentLeadId = undefined
+      ;(ctx.scene.session as any).awaitingReply = false
+      ;(ctx.scene.session as any).currentLeadId = undefined
     }
   }
 })
@@ -232,8 +222,8 @@ leadsScene.action("all_leads", async (ctx) => {
 })
 
 leadsScene.command("cancel", async (ctx) => {
-  ctx.scene.session.awaitingReply = false
-  ctx.scene.session.currentLeadId = undefined
+  ;(ctx.scene.session as any).awaitingReply = false
+  ;(ctx.scene.session as any).currentLeadId = undefined
   await ctx.reply("❌ Отменено")
   await ctx.scene.leave()
 })

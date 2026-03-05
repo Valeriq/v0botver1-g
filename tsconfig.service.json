@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
-    "outDir": "./dist",
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
     "strict": false,
     "noImplicitAny": false,
     "strictNullChecks": false,
@@ -12,12 +13,8 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "lib": ["ES2022"],
-    "baseUrl": ".",
-    "paths": {
-      "@cold-email-bot/shared/*": ["../../packages/shared/src/*"]
-    }
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }

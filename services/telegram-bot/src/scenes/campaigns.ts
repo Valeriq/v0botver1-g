@@ -7,7 +7,7 @@ interface CampaignsContext extends Context {
   scene: Scenes.SceneContextScene<CampaignsContext>
 }
 
-export const campaignsScene = new Scenes.BaseScene<CampaignsContext>("campaigns")
+export const campaignsScene = new Scenes.BaseScene<CampaignsContext>("campaigns") as any
 
 campaignsScene.enter(async (ctx) => {
   const workspaceId = ctx.from?.id.toString()

@@ -3,7 +3,7 @@ import axios from "axios"
 
 const CORE_API_URL = process.env.CORE_API_URL || "http://localhost:3000"
 
-export const metricsScene = new Scenes.BaseScene<Scenes.SceneContext>("metrics")
+export const metricsScene = new Scenes.BaseScene<Scenes.SceneContext>("metrics") as any
 
 metricsScene.enter(async (ctx) => {
   try {

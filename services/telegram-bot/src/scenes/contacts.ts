@@ -1,20 +1,10 @@
-import { Scenes, Markup, type Context } from "telegraf"
+import { Scenes, Markup } from "telegraf"
 import axios from "axios"
 
 const coreApiUrl = process.env.CORE_API_URL || "http://localhost:3000"
 const aiOrchestratorUrl = process.env.AI_ORCHESTRATOR_URL || "http://localhost:3002"
 
-interface ContactsSceneSession extends Scenes.SceneSession {
-  awaitingFile?: boolean
-  awaitingPerplexity?: boolean
-}
-
-interface ContactsContext extends Context {
-  scene: Scenes.SceneContextScene<ContactsContext, ContactsSceneSession>
-  session: ContactsSceneSession
-}
-
-export const contactsScene = new Scenes.BaseScene<ContactsContext>("contacts")
+export const contactsScene = new Scenes.BaseScene<Scenes.SceneContext>("contacts")
 
 // Entry point
 contactsScene.enter(async (ctx) => {
@@ -54,12 +44,12 @@ contactsScene.action("upload_csv", async (ctx) => {
   await ctx.reply(
     "📤 Отправьте CSV или TSV файл с контактами\n\nФормат: email, first_name, last_name, company, website",
   )
-  ctx.scene.session.awaitingFile = true
+  ;(ctx.scene.session as any).awaitingFile = true
 })
 
 // Handle file upload
 contactsScene.on("document", async (ctx) => {
-  if (!ctx.scene.session.awaitingFile) return
+  if (!(ctx.scene.session as any).awaitingFile) return
 
   const workspaceId = ctx.from?.id.toString()
   const document = ctx.message.document
@@ -91,7 +81,7 @@ contactsScene.on("document", async (ctx) => {
         `Используйте /menu для возврата`,
     )
 
-    ctx.scene.session.awaitingFile = false
+    ;(ctx.scene.session as any).awaitingFile = false
     await ctx.scene.leave()
   } catch (error: any) {
     console.error("[contacts] Upload error:", error.response?.data || error.message)
@@ -108,17 +98,17 @@ contactsScene.action("perplexity_import", async (ctx) => {
       '"Найди 50 email адресов CEO в SaaS компаниях из Сан-Франциско"\n\n' +
       "Отправьте /cancel для отмены",
   )
-  ctx.scene.session.awaitingPerplexity = true
+  ;(ctx.scene.session as any).awaitingPerplexity = true
 })
 
 // Handle Perplexity query
 contactsScene.on("text", async (ctx) => {
-  if (ctx.scene.session.awaitingPerplexity) {
+  if ((ctx.scene.session as any).awaitingPerplexity) {
     const query = ctx.message.text
 
     if (query === "/cancel") {
       await ctx.reply("❌ Отменено")
-      ctx.scene.session.awaitingPerplexity = false
+      ;(ctx.scene.session as any).awaitingPerplexity = false
       return ctx.scene.leave()
     }
 
@@ -150,7 +140,7 @@ contactsScene.on("text", async (ctx) => {
       )
     }
 
-    ctx.scene.session.awaitingPerplexity = false
+    (ctx.scene.session as any).awaitingPerplexity = false
     return ctx.scene.leave()
   }
 })

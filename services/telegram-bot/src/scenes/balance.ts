@@ -7,7 +7,7 @@ interface BalanceContext extends Context {
   scene: Scenes.SceneContextScene<BalanceContext>
 }
 
-export const balanceScene = new Scenes.BaseScene<BalanceContext>("balance")
+export const balanceScene = new Scenes.BaseScene<BalanceContext>("balance") as any
 
 balanceScene.enter(async (ctx) => {
   const workspaceId = ctx.from?.id.toString()

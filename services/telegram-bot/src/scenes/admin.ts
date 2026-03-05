@@ -9,7 +9,7 @@ function isAdmin(telegramId: string): boolean {
   return ADMIN_TELEGRAM_IDS.includes(telegramId)
 }
 
-export const adminScene = new Scenes.BaseScene<Scenes.SceneContext>("admin")
+export const adminScene = new Scenes.BaseScene<Scenes.SceneContext>("admin") as any
 
 adminScene.enter(async (ctx) => {
   const telegramId = ctx.from?.id.toString()

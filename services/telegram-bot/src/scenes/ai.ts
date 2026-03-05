@@ -1,19 +1,9 @@
-import { Scenes, Markup, type Context } from "telegraf"
+import { Scenes, Markup } from "telegraf"
 import axios from "axios"
 
 const coreApiUrl = process.env.CORE_API_URL || "http://localhost:3000"
 
-interface AISceneSession extends Scenes.SceneSession {
-  awaitingPrompt?: boolean
-  currentProfileId?: string
-}
-
-interface AIContext extends Context {
-  scene: Scenes.SceneContextScene<AIContext, AISceneSession>
-  session: AISceneSession
-}
-
-export const aiScene = new Scenes.BaseScene<AIContext>("ai")
+export const aiScene = new Scenes.BaseScene<Scenes.SceneContext>("ai")
 
 aiScene.enter(async (ctx) => {
   const workspaceId = ctx.from?.id.toString()
@@ -49,17 +39,17 @@ aiScene.action("create_profile", async (ctx) => {
       '"Ты опытный email-маркетолог. Пиши персонализированные письма с учетом компании получателя. Стиль: дружелюбный, профессиональный."\n\n' +
       "Отправьте /cancel для отмены",
   )
-  ctx.scene.session.awaitingPrompt = true
+  ;(ctx.scene.session as any).awaitingPrompt = true
 })
 
 aiScene.on("text", async (ctx) => {
-  if (ctx.scene.session.awaitingPrompt) {
+  if ((ctx.scene.session as any).awaitingPrompt) {
     const prompt = ctx.message.text
     const workspaceId = ctx.from?.id.toString()
 
     if (prompt === "/cancel") {
       await ctx.reply("❌ Отменено")
-      ctx.scene.session.awaitingPrompt = false
+      ;(ctx.scene.session as any).awaitingPrompt = false
       return ctx.scene.leave()
     }
 
@@ -72,7 +62,7 @@ aiScene.on("text", async (ctx) => {
 
       await ctx.reply(`✅ Профиль создан!\n\nID: ${response.data.profile.id.substring(0, 8)}...\n\nИспользуйте /menu`)
 
-      ctx.scene.session.awaitingPrompt = false
+      ;(ctx.scene.session as any).awaitingPrompt = false
       return ctx.scene.leave()
     } catch (error) {
       console.error("[ai] Create profile error:", error)
