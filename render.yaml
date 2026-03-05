@@ -29,7 +29,7 @@ services:
     plan: free
     env: docker
     dockerfilePath: ./services/core-api/Dockerfile
-    dockerContext: ./services/core-api
+    dockerContext: .
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
@@ -52,7 +52,7 @@ services:
     plan: free
     env: docker
     dockerfilePath: ./services/telegram-bot/Dockerfile
-    dockerContext: ./services/telegram-bot
+    dockerContext: .
     envVars:
       - key: NODE_ENV
         value: production
@@ -75,7 +75,7 @@ services:
     plan: free
     env: docker
     dockerfilePath: ./services/worker/Dockerfile
-    dockerContext: ./services/worker
+    dockerContext: .
     envVars:
       - key: NODE_ENV
         value: production
@@ -105,7 +105,7 @@ services:
     plan: free
     env: docker
     dockerfilePath: ./services/gmail-service/Dockerfile
-    dockerContext: ./services/gmail-service
+    dockerContext: .
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
@@ -138,7 +138,7 @@ services:
     plan: free
     env: docker
     dockerfilePath: ./services/ai-orchestrator/Dockerfile
-    dockerContext: ./services/ai-orchestrator
+    dockerContext: .
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
