@@ -1,5 +1,5 @@
 services:
-  # PostgreSQL Database
+  # PostgreSQL Database (dev, без диска на free-плане)
   - type: pserv
     name: postgres
     plan: free
@@ -12,16 +12,16 @@ services:
         value: postgres
       - key: POSTGRES_PASSWORD
         generateValue: true
-    disk:
-      name: postgres-data
-      mountPath: /var/lib/postgresql/data
-      sizeGB: 1
+    # На free-плане диски не поддерживаются, поэтому блок disk удалён
 
   # Redis
   - type: redis
     name: redis
     plan: free
     maxmemoryPolicy: noeviction
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: allow all (dev only)
 
   # Core API
   - type: web
