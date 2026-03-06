@@ -48,7 +48,6 @@ services:
     build:
       context: ./services/core-api
       dockerfile: Dockerfile
-      # target: development
     ports:
       - "3000:3000"
       - "9229:9229"
@@ -73,7 +72,6 @@ services:
     build:
       context: ./services/telegram-bot
       dockerfile: Dockerfile
-      # target: development
     environment:
       NODE_ENV: development
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
@@ -93,7 +91,6 @@ services:
     build:
       context: ./services/worker
       dockerfile: Dockerfile
-      # target: development
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/cold_email_bot
@@ -117,7 +114,6 @@ services:
     build:
       context: ./services/gmail-service
       dockerfile: Dockerfile
-      # target: development
     ports:
       - "3001:3001"
     environment:
@@ -142,7 +138,6 @@ services:
     build:
       context: ./services/ai-orchestrator
       dockerfile: Dockerfile
-      # target: development
     ports:
       - "3002:3002"
     environment:
@@ -164,7 +159,6 @@ services:
     build:
       context: ./services/observability
       dockerfile: Dockerfile
-      # target: development
     ports:
       - "9090:9090"
     environment:
