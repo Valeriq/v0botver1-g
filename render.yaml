@@ -1,19 +1,4 @@
 services:
-  # PostgreSQL Database (dev, без диска на free-плане)
-  - type: pserv
-    name: postgres
-    plan: free
-    env: docker
-    dockerfilePath: ./Dockerfile.postgres
-    envVars:
-      - key: POSTGRES_DB
-        value: cold_email_bot
-      - key: POSTGRES_USER
-        value: postgres
-      - key: POSTGRES_PASSWORD
-        generateValue: true
-    # На free-плане диски не поддерживаются, поэтому блок disk удалён
-
   # Redis
   - type: redis
     name: redis
@@ -167,3 +152,8 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+
+databases:
+  - name: postgres
+    plan: free
+    databaseName: cold_email_bot
