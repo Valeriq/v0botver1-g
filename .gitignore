@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+client/node_modules
 services/*/node_modules
 packages/*/node_modules
 
