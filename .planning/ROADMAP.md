@@ -28,9 +28,9 @@ Build a React dashboard for email outreach management with AI Conversation Agent
   5. Layout components (Sidebar, Header) are functional
 
 Plans:
-- [ ] 01-01: Project setup and dependencies (Zustand, TanStack Table)
-- [ ] 01-02: API client and TanStack Query configuration
-- [ ] 01-03: Layout components (AppLayout, Sidebar, Header)
+- [ ] 01-01-PLAN.md — Install dependencies (Zustand, TanStack Table, testing-library) and create UI store
+- [ ] 01-02-PLAN.md — Enhance API client with error handling and create query keys factory
+- [ ] 01-03-PLAN.md — Add Header component and make Sidebar responsive with Zustand
 
 ### Phase 2: Dashboard & Contacts
 **Goal**: Users can view key metrics and manage their contact database
