@@ -1,77 +1,62 @@
-/**
- * Type-safe query keys factory for TanStack Query
- * Provides hierarchical structure for cache key management
- */
 export const queryKeys = {
-  /**
-   * Query keys for contacts
-   */
+  all: ['all'] as const,
+  
+  // Contacts
   contacts: {
-    /** All contacts query key */
     all: ['contacts'] as const,
-    /** List of contacts query key */
-    list: () => [...queryKeys.contacts.all, 'list'] as const,
-    /** Single contact detail query key */
-    detail: (id: string) => [...queryKeys.contacts.all, 'detail', id] as const,
+    lists: () => [...queryKeys.contacts.all, 'list'] as const,
+    list: (filters: Record<string, unknown>) => [...queryKeys.contacts.lists(), { filters }] as const,
+    details: () => [...queryKeys.contacts.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.contacts.details(), id] as const,
   },
-
-  /**
-   * Query keys for campaigns
-   */
+  
+  // Campaigns
   campaigns: {
-    /** All campaigns query key */
     all: ['campaigns'] as const,
-    /** List of campaigns query key */
-    list: () => [...queryKeys.campaigns.all, 'list'] as const,
-    /** Single campaign detail query key */
-    detail: (id: string) => [...queryKeys.campaigns.all, 'detail', id] as const,
+    lists: () => [...queryKeys.campaigns.all, 'list'] as const,
+    list: (filters: Record<string, unknown>) => [...queryKeys.campaigns.lists(), { filters }] as const,
+    details: () => [...queryKeys.campaigns.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.campaigns.details(), id] as const,
   },
-
-  /**
-   * Query keys for leads
-   */
+  
+  // Leads
   leads: {
-    /** All leads query key */
     all: ['leads'] as const,
-    /** List of leads query key */
-    list: () => [...queryKeys.leads.all, 'list'] as const,
-    /** Single lead detail query key */
-    detail: (id: string) => [...queryKeys.leads.all, 'detail', id] as const,
+    lists: () => [...queryKeys.leads.all, 'list'] as const,
+    list: (filters: Record<string, unknown>) => [...queryKeys.leads.lists(), { filters }] as const,
+    details: () => [...queryKeys.leads.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.leads.details(), id] as const,
   },
-
-  /**
-   * Query keys for emails
-   */
+  
+  // Gmail Accounts
+  accounts: {
+    all: ['accounts'] as const,
+    lists: () => [...queryKeys.accounts.all, 'list'] as const,
+    list: (workspaceId: string) => [...queryKeys.accounts.lists(), workspaceId] as const,
+    details: () => [...queryKeys.accounts.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.accounts.details(), id] as const,
+  },
+  
+  // Templates (Prompt Profiles)
+  templates: {
+    all: ['templates'] as const,
+    lists: () => [...queryKeys.templates.all, 'list'] as const,
+    list: (workspaceId: string) => [...queryKeys.templates.lists(), workspaceId] as const,
+    details: () => [...queryKeys.templates.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.templates.details(), id] as const,
+  },
+  
+  // Emails
   emails: {
-    /** All emails query key */
     all: ['emails'] as const,
-    /** List of emails query key */
-    list: () => [...queryKeys.emails.all, 'list'] as const,
-    /** Single email detail query key */
-    detail: (id: string) => [...queryKeys.emails.all, 'detail', id] as const,
+    lists: () => [...queryKeys.emails.all, 'list'] as const,
+    list: (filters: Record<string, unknown>) => [...queryKeys.emails.lists(), { filters }] as const,
+    thread: (contactId: string) => [...queryKeys.emails.all, 'thread', contactId] as const,
   },
-
-  /**
-   * Query keys for Gmail accounts
-   */
-  gmailAccounts: {
-    /** All Gmail accounts query key */
-    all: ['gmailAccounts'] as const,
-    /** List of Gmail accounts query key */
-    list: () => [...queryKeys.gmailAccounts.all, 'list'] as const,
-    /** Single Gmail account detail query key */
-    detail: (id: string) => [...queryKeys.gmailAccounts.all, 'detail', id] as const,
+  
+  // Dashboard stats
+  dashboard: {
+    all: ['dashboard'] as const,
+    stats: (workspaceId: string) => [...queryKeys.dashboard.all, 'stats', workspaceId] as const,
   },
-
-  /**
-   * Query keys for prompt profiles
-   */
-  promptProfiles: {
-    /** All prompt profiles query key */
-    all: ['promptProfiles'] as const,
-    /** List of prompt profiles query key */
-    list: () => [...queryKeys.promptProfiles.all, 'list'] as const,
-    /** Single prompt profile detail query key */
-    detail: (id: string) => [...queryKeys.promptProfiles.all, 'detail', id] as const,
-  },
-} as const;
+};
