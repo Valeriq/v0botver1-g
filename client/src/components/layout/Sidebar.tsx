@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUIStore } from "@/stores";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
@@ -26,6 +27,7 @@ const navigation = [
 export function Sidebar() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
+  const { sidebarOpen } = useUIStore();
 
   const handleLogout = async () => {
     await logout();
@@ -33,7 +35,10 @@ export function Sidebar() {
   };
 
   return (
-    <div className="flex h-screen flex-col border-r bg-card w-64 fixed left-0 top-0 z-50">
+    <div className={cn(
+      "flex h-screen flex-col border-r bg-card w-64 fixed left-0 top-0 z-50 transition-transform duration-300",
+      !sidebarOpen && "-translate-x-full"
+    )}>
       <div className="flex h-16 items-center px-6 border-b border-border/50">
         <div className="flex items-center gap-2 text-primary font-display font-bold text-xl">
           <Bot className="h-6 w-6" />
