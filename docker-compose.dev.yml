@@ -46,8 +46,8 @@ services:
 
   core-api:
     build:
-      context: ./services/core-api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/core-api/Dockerfile
       target: development
     ports:
       - "3000:3000"
@@ -65,14 +65,13 @@ services:
       db-init:
         condition: service_completed_successfully
     volumes:
-      - ./services/core-api/src:/app/src:ro
-      - ./packages/shared/src:/app/node_modules/@shared/src:ro
-    command: npm run dev
+      - ./services/core-api/src:/app/services/core-api/src:ro
+      - ./packages/shared/src:/app/packages/shared/src:ro
 
   telegram-bot:
     build:
-      context: ./services/telegram-bot
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/telegram-bot/Dockerfile
       target: development
     environment:
       NODE_ENV: development
@@ -84,15 +83,14 @@ services:
       - core-api
       - redis
     volumes:
-      - ./services/telegram-bot/src:/app/src:ro
-      - ./packages/shared/src:/app/node_modules/@shared/src:ro
-    command: npm run dev
+      - ./services/telegram-bot/src:/app/services/telegram-bot/src:ro
+      - ./packages/shared/src:/app/packages/shared/src:ro
     restart: unless-stopped
 
   worker:
     build:
-      context: ./services/worker
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/worker/Dockerfile
       target: development
     environment:
       NODE_ENV: development
@@ -108,15 +106,14 @@ services:
       - ai-orchestrator
       - gmail-service
     volumes:
-      - ./services/worker/src:/app/src:ro
-      - ./packages/shared/src:/app/node_modules/@shared/src:ro
-    command: npm run dev
+      - ./services/worker/src:/app/services/worker/src:ro
+      - ./packages/shared/src:/app/packages/shared/src:ro
     restart: unless-stopped
 
   gmail-service:
     build:
-      context: ./services/gmail-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/gmail-service/Dockerfile
       target: development
     ports:
       - "3001:3001"
@@ -133,15 +130,14 @@ services:
       - postgres
       - redis
     volumes:
-      - ./services/gmail-service/src:/app/src:ro
-      - ./packages/shared/src:/app/node_modules/@shared/src:ro
-    command: npm run dev
+      - ./services/gmail-service/src:/app/services/gmail-service/src:ro
+      - ./packages/shared/src:/app/packages/shared/src:ro
     restart: unless-stopped
 
   ai-orchestrator:
     build:
-      context: ./services/ai-orchestrator
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/ai-orchestrator/Dockerfile
       target: development
     ports:
       - "3002:3002"
@@ -155,9 +151,8 @@ services:
     depends_on:
       - postgres
     volumes:
-      - ./services/ai-orchestrator/src:/app/src:ro
-      - ./packages/shared/src:/app/node_modules/@shared/src:ro
-    command: npm run dev
+      - ./services/ai-orchestrator/src:/app/services/ai-orchestrator/src:ro
+      - ./packages/shared/src:/app/packages/shared/src:ro
     restart: unless-stopped
 
   observability:

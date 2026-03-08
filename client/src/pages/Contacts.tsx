@@ -7,6 +7,8 @@ import { apiGet } from '../lib/apiClient';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
+import { ContactFilters } from '../components/contacts/ContactFilters';
+import { CSVUpload } from '../components/contacts/CSVUpload';
 
 interface Contact {
   id: string;
@@ -15,7 +17,6 @@ interface Contact {
   lastName: string;
   company: string;
   status: string;
-  createdAt: string;
 }
 
 interface ContactsResponse {
@@ -28,11 +29,12 @@ interface ContactsResponse {
 export function Contacts() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('all');
   const pageSize = 25;
 
   const { data, isLoading } = useQuery({
-    queryKey: queryKeys.contacts.list({ page, search }),
-    queryFn: () => apiGet<ContactsResponse>(`/api/contacts?page=${page}&limit=${pageSize}&search=${search}`),
+    queryKey: queryKeys.contacts.list({ page, search, status }),
+    queryFn: () => apiGet<ContactsResponse>(`/api/contacts?page=${page}&limit=${pageSize}&search=${search}&status=${status === 'all' ? '' : status}`),
   });
 
   const columns: ColumnDef<Contact>[] = [
@@ -49,10 +51,26 @@ export function Contacts() {
     getCoreRowModel: getCoreRowModel(),
   });
 
+  const handleUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await fetch('/api/contacts/upload', {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Upload failed');
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Контакты</h1>
+        <CSVUpload onUpload={handleUpload} />
+      </div>
+
+      <div className="flex justify-between items-center">
+        <ContactFilters status={status} onStatusChange={setStatus} />
         <div className="relative w-64">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input

@@ -2,8 +2,20 @@ FROM node:20-alpine AS base
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
+FROM base AS development
+COPY pnpm-workspace.yaml ./
+COPY tsconfig.service.json ./
+COPY packages/shared ./packages/shared
+COPY package.json pnpm-lock.yaml* ./
+COPY services/ai-orchestrator ./services/ai-orchestrator
+RUN pnpm install --no-frozen-lockfile
+WORKDIR /app/services/ai-orchestrator
+EXPOSE 3002
+CMD ["npx", "tsx", "watch", "src/index.ts"]
+
 FROM base AS builder
 COPY pnpm-workspace.yaml ./
+COPY tsconfig.service.json ./
 COPY packages/shared ./packages/shared
 COPY package.json pnpm-lock.yaml* ./
 COPY services/ai-orchestrator ./services/ai-orchestrator
