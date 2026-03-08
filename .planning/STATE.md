@@ -5,30 +5,30 @@
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** Один workspace = один кабинет клиента с полным контролем над email-аутричем
-**Current focus:** Phase 2 - Dashboard & Contacts
+**Current focus:** Phase 3 - Email & Thread View
 
 ## Current Position
 
-Phase: 2 of 7 (Dashboard & Contacts)
-Plan: 0 of 3 in current phase
-Status: Phase 1 completed, ready to plan Phase 2
-Last activity: 2026-03-08 — Phase 1 completed
+Phase: 3 of 7 (Email & Thread View)
+Plan: 0 of 2 in current phase
+Status: Phase 1 & 2 completed, ready to plan Phase 3
+Last activity: 2026-03-08 — Phase 2 completed
 
-Progress: [██░░░░░░░░] 14%
+Progress: [████░░░░░░] 28%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
+- Total plans completed: 6
 - Average duration: ~30 min per plan
-- Total execution time: ~1.5 hours
+- Total execution time: ~3 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Status |
 |-------|-------|-------|--------|
 | 1. Foundation | 3/3 | 3 | ✅ Complete |
-| 2. Dashboard & Contacts | 0/3 | 3 | Not started |
+| 2. Dashboard & Contacts | 3/3 | 3 | ✅ Complete |
 | 3. Email & Thread View | 0/2 | 2 | Not started |
 | 4. AI Conversation Agent | 0/5 | 5 | Not started |
 | 5. Templates & Accounts | 0/3 | 3 | Not started |

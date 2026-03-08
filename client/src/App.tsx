@@ -8,12 +8,14 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
 
-import Dashboard from "@/pages/Dashboard";
-import Contacts from "@/pages/Contacts";
+import { Dashboard } from "@/pages/Dashboard";
+import { Contacts } from "@/pages/Contacts";
 import Campaigns from "@/pages/Campaigns";
 import AIProfiles from "@/pages/AIProfiles";
 import Leads from "@/pages/Leads";
 import GmailAccounts from "@/pages/GmailAccounts";
+import { Emails } from "@/pages/Emails";
+import { Thread } from "@/pages/Thread";
 
 function Router() {
   return (
@@ -36,6 +38,12 @@ function Router() {
       </Route>
       <Route path="/gmail-accounts">
         <ProtectedRoute><GmailAccounts /></ProtectedRoute>
+      </Route>
+      <Route path="/emails">
+        <ProtectedRoute><Emails /></ProtectedRoute>
+      </Route>
+      <Route path="/thread/:contactId">
+        <ProtectedRoute><Thread /></ProtectedRoute>
       </Route>
       <Route component={NotFound} />
     </Switch>
