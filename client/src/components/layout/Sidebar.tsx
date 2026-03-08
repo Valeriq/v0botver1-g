@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 const navigation = [
   { name: "Главная", href: "/", icon: LayoutDashboard },
   { name: "Контакты", href: "/contacts", icon: Users },
+  { name: "Письма", href: "/emails", icon: Mail },
   { name: "Кампании", href: "/campaigns", icon: Send },
   { name: "AI Профили", href: "/ai-profiles", icon: Sparkles },
   { name: "Лиды", href: "/leads", icon: Inbox },
