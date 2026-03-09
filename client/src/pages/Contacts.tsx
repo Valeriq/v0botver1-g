@@ -9,6 +9,8 @@ import { Button } from '../components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { ContactFilters } from '../components/contacts/ContactFilters';
 import { CSVUpload } from '../components/contacts/CSVUpload';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 interface Contact {
   id: string;
@@ -63,11 +65,13 @@ export function Contacts() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Контакты</h1>
-        <CSVUpload onUpload={handleUpload} />
-      </div>
+    <AppLayout>
+      <PageHeader 
+        title="Контакты" 
+        description="Управляйте списком контактов для email-рассылок."
+        actions={<CSVUpload onUpload={handleUpload} />}
+      />
+      <div className="space-y-6">
 
       <div className="flex justify-between items-center">
         <ContactFilters status={status} onStatusChange={setStatus} />
@@ -146,6 +150,7 @@ export function Contacts() {
           </div>
         </>
       )}
-    </div>
+      </div>
+    </AppLayout>
   );
 }

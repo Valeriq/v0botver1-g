@@ -3,6 +3,8 @@ import { Mail, MailOpen, Reply, Users } from 'lucide-react';
 import { queryKeys } from '../lib/queryKeys';
 import { apiGet } from '../lib/apiClient';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 interface DashboardStats {
   sent: number;
@@ -38,8 +40,12 @@ export function Dashboard() {
   ];
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
+    <AppLayout>
+      <PageHeader 
+        title="Dashboard" 
+        description="Обзор вашей email-активности и ключевые метрики."
+      />
+      <div className="space-y-6">
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -85,6 +91,7 @@ export function Dashboard() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

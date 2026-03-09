@@ -6,6 +6,7 @@ import { apiGet } from '../lib/apiClient';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 interface ThreadEmail {
   id: string;
@@ -60,28 +61,33 @@ export function Thread() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <p>Загрузка...</p>
-      </div>
+      <AppLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <p>Загрузка...</p>
+        </div>
+      </AppLayout>
     );
   }
 
   if (!thread) {
     return (
-      <div className="space-y-6">
-        <Link href="/emails">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Назад к письмам
-          </Button>
-        </Link>
-        <p className="text-muted-foreground">Цепочка не найдена</p>
-      </div>
+      <AppLayout>
+        <div className="space-y-6">
+          <Link href="/emails">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Назад к письмам
+            </Button>
+          </Link>
+          <p className="text-muted-foreground">Цепочка не найдена</p>
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <AppLayout>
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Link href="/emails">
           <Button variant="ghost" size="sm">
@@ -161,6 +167,7 @@ export function Thread() {
           ))
         )}
       </div>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

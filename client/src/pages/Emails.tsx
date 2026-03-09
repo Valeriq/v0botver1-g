@@ -10,6 +10,8 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { EmailFilters } from '../components/emails/EmailFilters';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 interface Email {
   id: string;
@@ -115,10 +117,12 @@ export function Emails() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Письма</h1>
-      </div>
+    <AppLayout>
+      <PageHeader 
+        title="Письма" 
+        description="История всех отправленных и полученных писем."
+      />
+      <div className="space-y-6">
 
       <div className="flex justify-between items-center">
         <EmailFilters
@@ -207,6 +211,7 @@ export function Emails() {
           </div>
         </>
       )}
-    </div>
+      </div>
+    </AppLayout>
   );
 }
