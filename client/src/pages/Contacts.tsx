@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useReactTable, getCoreRowModel, flexRender, ColumnDef } from '@tanstack/react-table';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { queryKeys } from '../lib/queryKeys';
@@ -9,8 +9,13 @@ import { Button } from '../components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { ContactFilters } from '../components/contacts/ContactFilters';
 import { CSVUpload } from '../components/contacts/CSVUpload';
+import { SheetsImport } from '../components/contacts/SheetsImport';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { useToast } from '@/hooks/use-toast';
+
+// TODO: Get workspace ID from auth context
+const DEFAULT_WORKSPACE_ID = '00000000-0000-0000-0000-000000000000';
 
 interface Contact {
   id: string;
@@ -33,6 +38,8 @@ export function Contacts() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
   const pageSize = 25;
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data, isLoading } = useQuery({
     queryKey: queryKeys.contacts.list({ page, search, status }),
@@ -54,14 +61,52 @@ export function Contacts() {
   });
 
   const handleUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    const response = await fetch('/api/contacts/upload', {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-    });
-    if (!response.ok) throw new Error('Upload failed');
+    try {
+      // Читаем файл как текст
+      const fileContent = await file.text();
+      
+      // Отправляем JSON на backend
+      const response = await fetch('/api/contacts/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workspace_id: '00000000-0000-0000-0000-000000000000', // TODO: получить из контекста
+          file_content: fileContent,
+          filename: file.name,
+          delimiter: ',',
+        }),
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Upload failed');
+      }
+      
+      const result = await response.json();
+      
+      // Обновляем список контактов
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.list({ page, search, status }) });
+      
+      // Показываем уведомление
+      toast({
+        title: 'Файл загружен',
+        description: `Добавлено: ${result.uploaded}, пропущено: ${result.skipped}`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Ошибка загрузки',
+        description: error instanceof Error ? error.message : 'Неизвестная ошибка',
+        variant: 'destructive',
+      });
+      throw error;
+    }
+  };
+
+  const handleImportComplete = () => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.contacts.list({ page, search, status }) });
   };
 
   return (
@@ -69,7 +114,15 @@ export function Contacts() {
       <PageHeader 
         title="Контакты" 
         description="Управляйте списком контактов для email-рассылок."
-        actions={<CSVUpload onUpload={handleUpload} />}
+        actions={
+          <div className="flex gap-2">
+            <SheetsImport 
+              workspaceId={DEFAULT_WORKSPACE_ID}
+              onImportComplete={handleImportComplete}
+            />
+            <CSVUpload onUpload={handleUpload} />
+          </div>
+        }
       />
       <div className="space-y-6">
 
