@@ -63,6 +63,25 @@ export const paginationSchema = z.object({
   offset: z.coerce.number().int().min(0).default(0),
 })
 
+// Google Sheets import schemas
+export const importSheetsPreviewSchema = z.object({
+  workspace_id: z.string().uuid(),
+  sheet_url: z
+    .string()
+    .url()
+    .refine((url) => url.includes("docs.google.com/spreadsheets"), "URL must be a Google Sheets URL"),
+})
+
+export const importSheetsSchema = z.object({
+  workspace_id: z.string().uuid(),
+  sheet_url: z
+    .string()
+    .url()
+    .refine((url) => url.includes("docs.google.com/spreadsheets"), "URL must be a Google Sheets URL"),
+  contact_list_name: z.string().min(1).max(200).optional(),
+  column_mapping: z.record(z.string()).optional(),
+})
+
 // Helper function to validate and parse
 export function validateRequest<T>(schema: z.ZodSchema<T>, data: unknown): T {
   return schema.parse(data)
