@@ -16,6 +16,7 @@ import { requestLogger } from "./middleware/requestLogger"
 import { metricsRouter } from "./routes/metrics"
 import { apiLimiter } from "./middleware/rateLimiter"
 import { fileUploadRouter } from "./routes/file-upload"
+import { googleAuthRouter } from "./routes/googleAuth"
 
 dotenv.config()
 
@@ -44,6 +45,7 @@ app.use("/api/billing", billingRouter)
 app.use("/api/admin", adminRouter)
 app.use("/api/metrics", metricsRouter)
 app.use("/api", fileUploadRouter)
+app.use("/api/auth", googleAuthRouter)
 
 // Error handling
 app.use(errorHandler)

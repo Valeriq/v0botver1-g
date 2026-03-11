@@ -319,15 +319,23 @@ contactRouter.get("/", async (req, res, next) => {
   }
 })
 
-// Delete contact
-contactRouter.delete("/:id", async (req, res, next) => {
+// Delete all contacts for workspace
+contactRouter.delete("/all", async (req, res, next) => {
   try {
-    const { id } = req.params
     const { workspace_id } = req.query
 
-    await pool.query(`DELETE FROM contacts WHERE id = $1 AND workspace_id = $2`, [id, workspace_id])
+    if (!workspace_id) {
+      return res.status(400).json({ error: "workspace_id is required" })
+    }
 
-    res.json({ success: true })
+    const contactsResult = await pool.query("DELETE FROM contacts WHERE workspace_id = $1", [workspace_id])
+    const listsResult = await pool.query("DELETE FROM contact_lists WHERE workspace_id = $1", [workspace_id])
+
+    res.json({ 
+      success: true, 
+      contacts_deleted: contactsResult.rowCount,
+      lists_deleted: listsResult.rowCount 
+    })
   } catch (error) {
     next(error)
   }
