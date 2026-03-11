@@ -8,7 +8,6 @@ import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { ContactFilters } from '../components/contacts/ContactFilters';
-import { CSVUpload } from '../components/contacts/CSVUpload';
 import { SheetsImport } from '../components/contacts/SheetsImport';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -120,7 +119,6 @@ export function Contacts() {
               workspaceId={DEFAULT_WORKSPACE_ID}
               onImportComplete={handleImportComplete}
             />
-            <CSVUpload onUpload={handleUpload} />
           </div>
         }
       />
