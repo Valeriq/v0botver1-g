@@ -1,18 +1,7 @@
 {
+  "extends": "../../tsconfig.service.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "strict": false,
-    "noImplicitAny": false,
-    "strictNullChecks": false,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "lib": ["ES2022"],
     "baseUrl": ".",
     "paths": {
       "@cold-email-bot/shared/*": ["../../packages/shared/src/*"]

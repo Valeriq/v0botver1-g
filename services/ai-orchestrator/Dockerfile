@@ -6,6 +6,7 @@ FROM base AS builder
 COPY pnpm-workspace.yaml ./
 COPY packages/shared ./packages/shared
 COPY package.json pnpm-lock.yaml* ./
+COPY tsconfig.service.json ./
 COPY services/ai-orchestrator ./services/ai-orchestrator
 RUN pnpm install --no-frozen-lockfile
 RUN cd services/ai-orchestrator && pnpm run build
@@ -16,6 +17,7 @@ WORKDIR /app
 COPY pnpm-workspace.yaml ./
 COPY packages/shared ./packages/shared
 COPY package.json pnpm-lock.yaml* ./
+COPY tsconfig.service.json ./
 COPY services/ai-orchestrator/package.json ./services/ai-orchestrator/
 RUN pnpm install --prod --no-frozen-lockfile --filter @cold-email-bot/ai-orchestrator
 COPY --from=builder /app/services/ai-orchestrator/dist ./services/ai-orchestrator/dist

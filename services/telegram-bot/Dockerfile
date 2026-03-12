@@ -6,6 +6,7 @@ FROM base AS builder
 COPY pnpm-workspace.yaml ./
 COPY packages/shared ./packages/shared
 COPY package.json pnpm-lock.yaml* ./
+COPY tsconfig.service.json ./
 COPY services/telegram-bot ./services/telegram-bot
 RUN pnpm install --no-frozen-lockfile
 RUN cd services/telegram-bot && pnpm run build
@@ -16,6 +17,7 @@ WORKDIR /app
 COPY pnpm-workspace.yaml ./
 COPY packages/shared ./packages/shared
 COPY package.json pnpm-lock.yaml* ./
+COPY tsconfig.service.json ./
 COPY services/telegram-bot/package.json ./services/telegram-bot/
 RUN pnpm install --prod --no-frozen-lockfile --filter @cold-email-bot/telegram-bot
 COPY --from=builder /app/services/telegram-bot/dist ./services/telegram-bot/dist
