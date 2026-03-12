@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { pool } from "../db"
 
-export const adminRouter = Router()
+export const adminRouter: Router = Router()
 
 // Get all workspaces with activity stats
 adminRouter.get("/workspaces", async (req, res) => {

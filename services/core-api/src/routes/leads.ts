@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { pool } from "../db"
 
-export const leadRouter = Router()
+export const leadRouter: Router = Router()
 
 // List leads
 leadRouter.get("/", async (req, res, next) => {

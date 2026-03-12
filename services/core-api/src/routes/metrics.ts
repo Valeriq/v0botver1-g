@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { pool } from "../db"
 
-const router = Router()
+const router: Router = Router()
 
 // Get system metrics
 router.get("/", async (req, res) => {

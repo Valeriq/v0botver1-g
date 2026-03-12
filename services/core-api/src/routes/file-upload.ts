@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js"
 import { pool } from "../db"
 import multer from "multer"
 
-const router = Router()
+const router: Router = Router()
 
 const supabaseUrl = process.env.SUPABASE_URL || ""
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY || ""

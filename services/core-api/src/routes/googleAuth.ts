@@ -3,7 +3,7 @@ import { google } from "googleapis"
 import { pool } from "../db"
 import { v4 as uuidv4 } from "uuid"
 
-export const googleAuthRouter = Router()
+export const googleAuthRouter: Router = Router()
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,

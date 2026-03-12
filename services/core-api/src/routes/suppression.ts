@@ -2,7 +2,7 @@ import { Router } from "express"
 import { pool } from "../db"
 import { v4 as uuidv4 } from "uuid"
 
-export const suppressionRouter = Router()
+export const suppressionRouter: Router = Router()
 
 // Add email to suppression list
 suppressionRouter.post("/", async (req, res, next) => {
