@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
+import { TelegramLoginButton } from "@/components/TelegramLoginButton";
 import { 
   Bot, 
   Mail, 
@@ -12,7 +13,8 @@ import {
   ChevronUp,
   Github,
   Globe,
-  MessageCircle
+  MessageCircle,
+  Users
 } from "lucide-react";
 
 const features = [

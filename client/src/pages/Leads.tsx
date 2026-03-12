@@ -81,16 +81,16 @@ export default function Leads() {
                   </TableCell>
                   <TableCell>
                     <span className="font-medium">
-                      {classificationLabels[lead.classification] || lead.classification || 'Не классифицирован'}
+                      {'Не классифицирован'}
                     </span>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {lead.createdAt ? formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true, locale: ru }) : '-'}
                   </TableCell>
                   <TableCell>
-                    <a href={`#thread-${lead.gmailThreadId}`} className="flex items-center gap-1 text-primary hover:underline text-sm">
-                      Открыть переписку <ExternalLink className="h-3 w-3" />
-                    </a>
+                    <span className="flex items-center gap-1 text-primary text-sm">
+                      Нет переписки
+                    </span>
                   </TableCell>
                 </TableRow>
               ))

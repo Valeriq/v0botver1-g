@@ -49,7 +49,7 @@ export default function GmailAccounts() {
                       </span>
                     )}
                     <span className="text-xs text-muted-foreground">
-                      Дневной лимит: {account.dailySentCount || 0}/500
+                      Дневной лимит: 0/500
                     </span>
                   </div>
                 </div>
