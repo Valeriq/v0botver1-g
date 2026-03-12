@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid"
 export const workspaceRouter = Router()
 
 const createWorkspaceSchema = z.object({
-  telegram_user_id: z.string(),
+  telegram_user_id: z.string().or(z.number().transform(val => val.toString())),
   name: z.string().optional(),
   telegram_username: z.string().optional(),
   telegram_first_name: z.string().optional(),
