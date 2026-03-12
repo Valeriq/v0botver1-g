@@ -159,11 +159,11 @@ export const mcpToolsDefinition = [
 
 export async function executeMcpTool(toolName: string, args: any) {
   switch (toolName) {
-    case "db_read":
+    case "db_read": {
       const { table, columns, where_clause } = args
       const cols = columns ? columns.join(", ") : "*"
       const query = `SELECT ${cols} FROM ${table}${where_clause ? ` WHERE ${where_clause}` : ""}`
-      return await dbReadTool(query)
+      return await dbReadTool(query) }
 
     case "policy_check":
       return await policyCheckTool(args.content)

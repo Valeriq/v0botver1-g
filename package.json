@@ -20,7 +20,7 @@
     "test:unit": "vitest run **/*.test.ts",
     "test:integration": "vitest run **/__tests__/**/*.test.ts",
     "test:legacy": "pnpm -r test",
-    "migrate:test": "DATABASE_URL=$DATABASE_URL node services/core-api/src/db/migrate.ts",
+    "migrate:test": "DATABASE_URL=$DATABASE_URL npx tsx services/core-api/src/db/migrate.ts",
     "check": "pnpm lint:check && pnpm typecheck && pnpm test"
   },
   "dependencies": {
