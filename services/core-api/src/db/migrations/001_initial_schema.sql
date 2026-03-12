@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS workspaces (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_workspaces_telegram_user_id ON workspaces(telegram_user_id);
+CREATE INDEX IF NOT EXISTS idx_workspaces_telegram_user_id ON workspaces(telegram_user_id);
 
 -- Users
 CREATE TABLE IF NOT EXISTS users (
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_users_workspace_id ON users(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_users_workspace_id ON users(workspace_id);
 
 -- Contacts
 CREATE TABLE IF NOT EXISTS contacts (
@@ -37,8 +37,8 @@ CREATE TABLE IF NOT EXISTS contacts (
   UNIQUE(workspace_id, email)
 );
 
-CREATE INDEX idx_contacts_workspace_id ON contacts(workspace_id);
-CREATE INDEX idx_contacts_email ON contacts(email);
+CREATE INDEX IF NOT EXISTS idx_contacts_workspace_id ON contacts(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_contacts_email ON contacts(email);
 
 -- Suppression List
 CREATE TABLE IF NOT EXISTS suppression (
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS suppression (
   UNIQUE(workspace_id, email)
 );
 
-CREATE INDEX idx_suppression_workspace_email ON suppression(workspace_id, email);
+CREATE INDEX IF NOT EXISTS idx_suppression_workspace_email ON suppression(workspace_id, email);
 
 -- Prompt Profiles
 CREATE TABLE IF NOT EXISTS prompt_profiles (
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS prompt_profiles (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_prompt_profiles_workspace_id ON prompt_profiles(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_prompt_profiles_workspace_id ON prompt_profiles(workspace_id);
 
 -- Campaigns
 CREATE TABLE IF NOT EXISTS campaigns (
@@ -77,8 +77,8 @@ CREATE TABLE IF NOT EXISTS campaigns (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_campaigns_workspace_id ON campaigns(workspace_id);
-CREATE INDEX idx_campaigns_status ON campaigns(status);
+CREATE INDEX IF NOT EXISTS idx_campaigns_workspace_id ON campaigns(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_campaigns_status ON campaigns(status);
 
 -- Campaign Steps (follow-up sequence)
 CREATE TABLE IF NOT EXISTS campaign_steps (
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS campaign_steps (
   UNIQUE(campaign_id, step_number)
 );
 
-CREATE INDEX idx_campaign_steps_campaign_id ON campaign_steps(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_campaign_steps_campaign_id ON campaign_steps(campaign_id);
 
 -- Campaign Recipients
 CREATE TABLE IF NOT EXISTS campaign_recipients (
@@ -106,8 +106,8 @@ CREATE TABLE IF NOT EXISTS campaign_recipients (
   UNIQUE(campaign_id, contact_id)
 );
 
-CREATE INDEX idx_campaign_recipients_campaign_id ON campaign_recipients(campaign_id);
-CREATE INDEX idx_campaign_recipients_status ON campaign_recipients(status);
+CREATE INDEX IF NOT EXISTS idx_campaign_recipients_campaign_id ON campaign_recipients(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_campaign_recipients_status ON campaign_recipients(status);
 
 -- Gmail Accounts (pool)
 CREATE TABLE IF NOT EXISTS gmail_accounts (
@@ -122,7 +122,7 @@ CREATE TABLE IF NOT EXISTS gmail_accounts (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_gmail_accounts_status ON gmail_accounts(status);
+CREATE INDEX IF NOT EXISTS idx_gmail_accounts_status ON gmail_accounts(status);
 
 -- Account Assignments (workspace → gmail accounts)
 CREATE TABLE IF NOT EXISTS account_assignments (
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS account_assignments (
   UNIQUE(workspace_id, gmail_account_id)
 );
 
-CREATE INDEX idx_account_assignments_workspace_id ON account_assignments(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_account_assignments_workspace_id ON account_assignments(workspace_id);
 
 -- Email Messages
 CREATE TABLE IF NOT EXISTS email_messages (
@@ -152,9 +152,9 @@ CREATE TABLE IF NOT EXISTS email_messages (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_email_messages_workspace_id ON email_messages(workspace_id);
-CREATE INDEX idx_email_messages_thread_id ON email_messages(thread_id);
-CREATE INDEX idx_email_messages_campaign_id ON email_messages(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_email_messages_workspace_id ON email_messages(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_email_messages_thread_id ON email_messages(thread_id);
+CREATE INDEX IF NOT EXISTS idx_email_messages_campaign_id ON email_messages(campaign_id);
 
 -- Reply Events
 CREATE TABLE IF NOT EXISTS reply_events (
@@ -170,8 +170,8 @@ CREATE TABLE IF NOT EXISTS reply_events (
   processed_at TIMESTAMPTZ
 );
 
-CREATE INDEX idx_reply_events_workspace_id ON reply_events(workspace_id);
-CREATE INDEX idx_reply_events_thread_id ON reply_events(thread_id);
+CREATE INDEX IF NOT EXISTS idx_reply_events_workspace_id ON reply_events(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_reply_events_thread_id ON reply_events(thread_id);
 
 -- Leads
 CREATE TABLE IF NOT EXISTS leads (
@@ -186,8 +186,8 @@ CREATE TABLE IF NOT EXISTS leads (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_leads_workspace_id ON leads(workspace_id);
-CREATE INDEX idx_leads_status ON leads(status);
+CREATE INDEX IF NOT EXISTS idx_leads_workspace_id ON leads(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
 
 -- Billing Ledger
 CREATE TABLE IF NOT EXISTS billing_ledger (
@@ -201,7 +201,7 @@ CREATE TABLE IF NOT EXISTS billing_ledger (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_billing_ledger_workspace_id ON billing_ledger(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_billing_ledger_workspace_id ON billing_ledger(workspace_id);
 
 -- Artifacts (AI generation)
 CREATE TABLE IF NOT EXISTS ai_artifacts (
@@ -213,7 +213,7 @@ CREATE TABLE IF NOT EXISTS ai_artifacts (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_ai_artifacts_email_message_id ON ai_artifacts(email_message_id);
+CREATE INDEX IF NOT EXISTS idx_ai_artifacts_email_message_id ON ai_artifacts(email_message_id);
 
 -- Queue Jobs
 CREATE TABLE IF NOT EXISTS queue_jobs (
@@ -230,6 +230,6 @@ CREATE TABLE IF NOT EXISTS queue_jobs (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_queue_jobs_status ON queue_jobs(status);
-CREATE INDEX idx_queue_jobs_queue_status ON queue_jobs(queue, status);
-CREATE INDEX idx_queue_jobs_scheduled_at ON queue_jobs(scheduled_at);
+CREATE INDEX IF NOT EXISTS idx_queue_jobs_status ON queue_jobs(status);
+CREATE INDEX IF NOT EXISTS idx_queue_jobs_queue_status ON queue_jobs(queue, status);
+CREATE INDEX IF NOT EXISTS idx_queue_jobs_scheduled_at ON queue_jobs(scheduled_at);
