@@ -3,7 +3,7 @@ import { z } from "zod"
 import { pool } from "../db/pool"
 import { v4 as uuidv4 } from "uuid"
 
-export const workspaceRouter = Router()
+export const workspaceRouter: Router = Router()
 
 const createWorkspaceSchema = z.object({
   telegram_user_id: z.string(),

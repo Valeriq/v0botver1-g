@@ -12,7 +12,7 @@ import {
 import { uploadLimiter } from "../middleware/rateLimiter"
 import { parseGoogleSheetsHTML } from "../lib/sheets-parser"
 
-export const contactRouter = Router()
+export const contactRouter: Router = Router()
 
 // Regex для Google Sheets URL
 const GOOGLE_SHEETS_REGEX = /docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/

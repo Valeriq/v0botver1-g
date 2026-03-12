@@ -2,7 +2,7 @@ import { Router } from "express"
 import { pool } from "../db"
 import { v4 as uuidv4 } from "uuid"
 
-export const billingRouter = Router()
+export const billingRouter: Router = Router()
 
 // Get balance
 billingRouter.get("/balance", async (req, res, next) => {

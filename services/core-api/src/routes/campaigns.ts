@@ -5,7 +5,7 @@ import { scheduleCampaign } from "../lib/queue"
 import { validateRequest, createCampaignSchema, updateCampaignStatusSchema, paginationSchema } from "../lib/validation"
 import { campaignLimiter } from "../middleware/rateLimiter"
 
-export const campaignRouter = Router()
+export const campaignRouter: Router = Router()
 
 // Create campaign
 campaignRouter.post("/", campaignLimiter, async (req, res, next) => {

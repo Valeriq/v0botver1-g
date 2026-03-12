@@ -2,7 +2,7 @@ import { Router } from "express"
 import { pool } from "../db"
 import { v4 as uuidv4 } from "uuid"
 
-export const promptProfileRouter = Router()
+export const promptProfileRouter: Router = Router()
 
 // Create prompt profile
 promptProfileRouter.post("/", async (req, res, next) => {

@@ -2,7 +2,7 @@ import { Router } from "express"
 import { pool } from "../db/pool"
 import { createClient } from "redis"
 
-export const healthRouter = Router()
+export const healthRouter: Router = Router()
 
 // Basic health check - возвращает статус без проверки зависимостей
 healthRouter.get("/", async (req, res) => {
