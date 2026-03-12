@@ -61,7 +61,7 @@ pnpm -r build
 Run database migrations to set up the schema:
 ```bash
 cd services/core-api
-npm run migrate
+pnpm migrate
 ```
 
 ## 5. Run Services
@@ -71,31 +71,31 @@ You need to start each service in a separate terminal or use a process manager l
 ### Core API (Port 3000)
 ```bash
 cd services/core-api
-npm run dev
+pnpm dev
 ```
 
 ### Gmail Service (Port 3001)
 ```bash
 cd services/gmail-service
-npm run dev
+pnpm dev
 ```
 
 ### AI Orchestrator (Port 3002)
 ```bash
 cd services/ai-orchestrator
-npm run dev
+pnpm dev
 ```
 
 ### Telegram Bot (Port 8080)
 ```bash
 cd services/telegram-bot
-npm run dev
+pnpm dev
 ```
 
 ### Worker
 ```bash
 cd services/worker
-npm run dev
+pnpm dev
 ```
 
 ## 6. Verification
