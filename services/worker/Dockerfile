@@ -6,6 +6,7 @@ FROM base AS builder
 COPY pnpm-workspace.yaml ./
 COPY packages/shared ./packages/shared
 COPY package.json pnpm-lock.yaml* ./
+COPY tsconfig.service.json ./
 COPY services/worker ./services/worker
 RUN pnpm install --no-frozen-lockfile
 RUN cd services/worker && pnpm run build
@@ -16,6 +17,7 @@ WORKDIR /app
 COPY pnpm-workspace.yaml ./
 COPY packages/shared ./packages/shared
 COPY package.json pnpm-lock.yaml* ./
+COPY tsconfig.service.json ./
 COPY services/worker/package.json ./services/worker/
 RUN pnpm install --prod --no-frozen-lockfile --filter @cold-email-bot/worker
 COPY --from=builder /app/services/worker/dist ./services/worker/dist
