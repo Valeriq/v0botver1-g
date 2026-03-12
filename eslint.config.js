@@ -3,6 +3,9 @@ import tsParser from "@typescript-eslint/parser";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
 
 export default [
+  {
+    ignores: ["**/node_modules/**", "**/dist/**", "**/build/**", "**/coverage/**"],
+  },
   js.configs.recommended,
   {
     files: ["**/*.ts", "**/*.tsx"],
@@ -19,9 +22,7 @@ export default [
       "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
       "no-console": "off",
       "no-undef": "off",
+      "no-case-declarations": "off",
     },
-  },
-  {
-    ignores: ["**/node_modules/**", "**/dist/**", "**/build/**"],
   },
 ];

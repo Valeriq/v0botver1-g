@@ -1,23 +1,17 @@
-import { processGenerateJob } from "../processors/generate"
-import { processClassifyJob } from "../processors/classify"
-import { processFollowupJob } from "../processors/followup"
-import type { Pool } from "pg"
-import type { RedisClientType } from "redis"
-import jest from "jest"
+import { describe, it, expect, vi } from "vitest"
+import { processGenerateJob, processClassifyJob, processFollowupJob } from "../processors"
+import { Pool } from "pg"
 
 const mockPool = {
-  query: jest.fn(),
+  query: vi.fn(),
 } as unknown as Pool
 
 const mockRedis = {
-  rPush: jest.fn(),
-} as unknown as RedisClientType
+  rPush: vi.fn(),
+  lPop: vi.fn(),
+} as any
 
-describe("Worker Processors", () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
+describe("Job Processors", () => {
   describe("processGenerateJob", () => {
     it("should generate email and queue send job", async () => {
       const mockJob = {
@@ -28,7 +22,7 @@ describe("Worker Processors", () => {
           contact_id: "cont-1",
         },
       }
-      ;(mockPool.query as jest.Mock)
+      ;(mockPool.query as any)
         .mockResolvedValueOnce({
           rows: [
             {
@@ -90,7 +84,7 @@ describe("Worker Processors", () => {
           thread_id: "thread-1",
         },
       }
-      ;(mockPool.query as jest.Mock).mockResolvedValueOnce({
+      ;(mockPool.query as any).mockResolvedValueOnce({
         rows: [{ status: "replied" }],
       })
 
@@ -109,7 +103,7 @@ describe("Worker Processors", () => {
           thread_id: "thread-1",
         },
       }
-      ;(mockPool.query as jest.Mock)
+      ;(mockPool.query as any)
         .mockResolvedValueOnce({ rows: [{ status: "sent" }] })
         .mockResolvedValueOnce({ rows: [] })
         .mockResolvedValueOnce({ rows: [{ status: "active" }] })
