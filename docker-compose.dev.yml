@@ -152,6 +152,7 @@ services:
     volumes:
       - ./services/ai-orchestrator/src:/app/src:ro
       - ./packages/shared/src:/app/node_modules/@shared/src:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     command: npm run dev
     restart: unless-stopped
 

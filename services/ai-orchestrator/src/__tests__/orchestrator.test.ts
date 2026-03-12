@@ -4,8 +4,10 @@ import { jest } from "@jest/globals"
 describe("AI Orchestrator", () => {
   describe("MCPTools", () => {
     it("should read database records", async () => {
+      const queryMock = jest.fn() as any;
+      queryMock.mockResolvedValue({ rows: [{ id: "1", name: "Test" }] });
       const tools = new MCPTools({
-        query: jest.fn().mockResolvedValue({ rows: [{ id: "1", name: "Test" }] }),
+        query: queryMock,
       } as any)
 
       const result = await tools.readDatabase("contacts", { workspace_id: "ws-1" })

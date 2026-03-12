@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { pool } from "../db"
 import { generateCompletion } from "../lib/openai-client"
-import { mcpToolsDefinition, executeMcpTool, policyCheckTool, saveArtifactTool } from "../lib/mcp-tools"
+import { getAllMcpTools, executeMcpTool, policyCheckTool, saveArtifactTool } from "../lib/mcp-tools"
 
 export const generateRouter = Router()
 
@@ -55,8 +55,11 @@ Generate both subject line and email body. Keep it professional, concise, and pe
 
     console.log("[generate] Generating email draft...")
 
+    // Get all tools including Docker ones
+    const allTools = await getAllMcpTools()
+
     // Step 1: Generate draft
-    const draftResponse = await generateCompletion(systemPrompt, userPrompt, mcpToolsDefinition)
+    const draftResponse = await generateCompletion(systemPrompt, userPrompt, allTools)
 
     let emailContent = draftResponse.content || ""
 

@@ -162,6 +162,7 @@ services:
     volumes:
       - ./services/ai-orchestrator:/app
       - /app/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
     command: npm run dev
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3002/health"]
